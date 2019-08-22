@@ -4,7 +4,22 @@
 #include<pthread.h>
 #include<string>
 #include<list>
+#include<iostream>
+#include<fstream>
+#include<cassert>
 #include"../include/performance.h"
+
+/**
+ * We have two modes to flush statistics data into File:
+ * 1. Thread Mode : when all Columns have 100 rows,wake up a flush thread, append 100 rows into csv File
+ * 2. OneTime Mode: call a function to make all rows append into file
+*/
+#define THREAD_FLUSH 0
+#define ONETIME_FLUSH 1
+
+#define FLUSH_MODE ONETIME_FLUSH
+
+#define THREAD_FLUSH_UNIT 1000
 
 //============================================================
 /***
@@ -14,47 +29,21 @@ class PerformanceIndicatior
 {
 private:
     std::string name;
+    std::string path;
     std::list<VALUE_TYPE> record_list;
-
-    std::list<CsvFile*> csv_list;
-
+    typedef std::list<VALUE_TYPE>::iterator RecordListIterator;
+ 
     int64_t count;
+    uint64_t flush_index;
 
-    unsigned int op_flag;
-
-    void appendRecord(VALUE_TYPE val);
+    RecordListIterator flush_start_iterator;
+    
     PerformanceIndicatior();
 
-public:
-    static PerformanceIndicatior * generateIndicator(const char * name,uint flag);
+    std::ofstream output_csv;
 
-    void addRecord(VALUE_TYPE val);
-    //bool isRecordType();
-   // bool isThis(const char * name);
-    //bool finishRecord();
-};
-
-std::list<PerformanceIndicatior *> per_list;
-typedef std::list<PerformanceIndicatior *>::iterator IndicatiorListIterator;
-
-PerformanceIndicatior * searchIndicatior(const char * name);
-void clearPerformanceData(const char * name);
-
-//============================================================
-/***
- *  Result File
- * */
-
-class CsvFile
-{
-private:
-    std::string path;
-    std::list<PerformanceIndicatior *> col_list;
-
-    uint64_t row_count;
-    
 #if FLUSH_MODE==THREAD_FLUSH
-    uint64_t flush_index;
+   
     bool finish;
     pthread_t csv_pthread;
     pthread_cond_t csv_cond;
@@ -64,20 +53,17 @@ private:
     static void * flushThreadRun(void * file);
 #endif 
    void flushCsv(uint64_t n);
-public:
-
-    CsvFile(const char * csvPath);  
-    ~CsvFile();
-    void addCol(PerformanceIndicatior * newCol);
-
-   // void startCsvFlush();
-};
-
-class ResultFile
-{
-private:
 
 public:
+    static PerformanceIndicatior * generateIndicator(const char * name,const char * dirPath);
+
+    void addRecord(VALUE_TYPE val);
+    void finishRecord();
 };
+
+std::list<PerformanceIndicatior *> per_list;
+typedef std::list<PerformanceIndicatior *>::iterator IndicatiorListIterator;
+
+PerformanceIndicatior * searchIndicatior(const char * name);
 
 #endif // !PERFOR_STATISTICS

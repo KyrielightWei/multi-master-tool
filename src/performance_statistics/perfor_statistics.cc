@@ -4,69 +4,105 @@
 /**
  * class PerformanceIndicatior
 */
-PerformanceIndicatior * PerformanceIndicatior::generateIndicator(const char * name,uint flag)
+PerformanceIndicatior * PerformanceIndicatior::generateIndicator(const char * name,const char * dirPath)
 {
     PerformanceIndicatior * newPerformance = new PerformanceIndicatior;
     newPerformance->name = name;
+    newPerformance->path = dirPath;
+    newPerformance->path = newPerformance->path + "/" + newPerformance->name + ".csv";
     newPerformance->record_list.clear;
     newPerformance->count = 0;
+    newPerformance->flush_index = 0;
+
+#if FLUSH_MODE==THREAD_FLUSH
+    pthread_cond_init(&newPerformance->csv_cond,NULL);
+    pthread_mutex_init(&newPerformance->csv_mutex,NULL);
+    newPerformance->finish = false;
+    pthread_create(&newPerformance->csv_pthread,NULL,flushThreadRun,newPerformance);
+#endif
+
     return newPerformance;
 }
 
-/**
- * class CsvFile
-*/
-CsvFile::CsvFile(const char * csvPath)
-{
-    path  = csvPath;
-    col_list.clear();
-    row_count = 0;
 
 #if FLUSH_MODE==THREAD_FLUSH
-    flush_index = 0;
-    pthread_cond_init(&csv_cond,NULL);
-    pthread_mutex_init(&csv_mutex,NULL);
-    finish = false;
-
-    pthread_create(&csv_pthread,NULL,flushThreadRun,this);
-#endif
-}
-
-#if FLUSH_MODE==THREAD_FLUSH
-void CsvFile::flushOrSleep()
+void PerformanceIndicatior::flushOrSleep()
 {
     pthread_mutex_lock(&csv_mutex);
-    while (row_count - flush_index < THREAD_FLUSH_UNIT && finish)
+    while (count - flush_index < THREAD_FLUSH_UNIT && finish)
     {
         pthread_cond_wait(&csv_cond,&csv_mutex);
     }
     pthread_mutex_unlock(&csv_mutex);
 }
 
-void * CsvFile::flushThreadRun(void * file)
+void * PerformanceIndicatior::flushThreadRun(void * file)
 {
-    CsvFile * csv = (CsvFile*)file;
+    PerformanceIndicatior * performanceI = (PerformanceIndicatior*)file;
     while (1)
     {
-        csv->flushOrSleep();
-        csv->flushCsv(THREAD_FLUSH_UNIT);
-        csv->flush_index = csv->flush_index + THREAD_FLUSH_UNIT;
+        performanceI->flushOrSleep();
+        performanceI->flushCsv(THREAD_FLUSH_UNIT);
+        performanceI->flush_index = performanceI->flush_index + THREAD_FLUSH_UNIT;
     }
 }
 #endif
 
-void CsvFile::flushCsv(uint64_t n)
+void PerformanceIndicatior::flushCsv(uint64_t n)
 {
-    if(n == 0)
+    output_csv.open(path,std::ios::out | std::ios::app);
+    uint64_t flushCount  = 0 ;
+    if(n == 0 || n > count - flush_index)
     {
-
+        flushCount = count - flush_index;
     }
     else
     {
-
+        flushCount = n;
     }
+
+     if(flush_index == 0)
+    {
+        flush_start_iterator = record_list.begin();
+        output_csv << name <<  std::endl;
+    }
+    else
+    {
+        flush_start_iterator++;
+    }
+    //std::string message = name + " -- Performance Record has already finish";
+    assert(flush_start_iterator != record_list.end());
+   
+    for(uint64_t i =0; i < flushCount;i++)
+    {
+        output_csv << *flush_start_iterator << std::endl;
+        if(i != flushCount -1)
+            flush_start_iterator++;
+    }
+    output_csv.close();
 }
 
+void PerformanceIndicatior::addRecord(VALUE_TYPE val)
+{
+    record_list.push_back(val);
+    // if(count == 0)
+    // {
+    //     flush_start_iterator=record_list.begin();
+    // }
+    count = count + 1;
+
+#if FLUSH_MODE==THREAD_FLUSH
+    if(count - flush_index >= THREAD_FLUSH_UNIT)
+    {
+        pthread_cond_signal(&csv_cond);
+    }
+#endif
+}
+
+void PerformanceIndicatior::finishRecord()
+{
+    flushCsv(0);
+}
 
 
 /**
@@ -83,6 +119,10 @@ PerformanceIndicatior * searchIndicatior(const char * name)
     }
     return NULL;
 }
+
+/**
+ * API
+*/
 
 void clearPerformanceData(const char * name)
 {
@@ -104,13 +144,10 @@ void clearPerformanceData(const char * name)
 
 
 
-/**
- * API
-*/
-void createIndicatior(const char * name,uint flag)
+void createIndicatior(const char * dirPath,const char * name)
 {
     PerformanceIndicatior * newIndicatior = NULL;
-    newIndicatior = PerformanceIndicatior::generateIndicator(name,flag);
+    newIndicatior = PerformanceIndicatior::generateIndicator(name,dirPath);
     per_list.push_back(newIndicatior);
 }
 

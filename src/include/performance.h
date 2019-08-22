@@ -12,18 +12,6 @@
 */
 #define VALUE_TYPE int64_t
 
-/**
- * We have two modes to flush statistics data into File:
- * 1. Thread Mode : when all Columns have 100 rows,wake up a flush thread, append 100 rows into csv File
- * 2. OneTime Mode: call a function to make all rows append into file
-*/
-#define THREAD_FLUSH 0
-#define ONETIME_FLUSH 1
-
-#define FLUSH_MODE THREAD_FLUSH
-
-#define THREAD_FLUSH_UNIT 1000
-
 //============================================================
 /***
  *  Performance API
@@ -33,8 +21,10 @@
 extern “C” {
 #endif // PERFORMANCE_C_API
 
-void createIndicatior(const char * name,unsigned int flag);
+void createIndicatior(const char * dirPath,const char * name);
 void addPerformanceRecord(const char * name,VALUE_TYPE val);
+void clearPerformanceData(const char * name);
+void finishRecord();
 
 #ifdef PERFORMANCE_C_API
 }
