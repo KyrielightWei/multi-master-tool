@@ -7,6 +7,7 @@
 #include<iostream>
 #include<fstream>
 #include<cassert>
+#include<cstring>
 #include"../include/performance.h"
 
 /**
@@ -38,13 +39,13 @@ private:
 
     RecordListIterator flush_start_iterator;
     
-    PerformanceIndicatior();
+    PerformanceIndicatior(){}
 
     std::ofstream output_csv;
 
 #if FLUSH_MODE==THREAD_FLUSH
    
-    bool finish;
+    bool unfinish;
     pthread_t csv_pthread;
     pthread_cond_t csv_cond;
     pthread_mutex_t csv_mutex; 
@@ -57,11 +58,12 @@ private:
 public:
     static PerformanceIndicatior * generateIndicator(const char * name,const char * dirPath);
 
+    bool isThis(const char * name);
     void addRecord(VALUE_TYPE val);
     void finishRecord();
 };
 
-std::list<PerformanceIndicatior *> per_list;
+
 typedef std::list<PerformanceIndicatior *>::iterator IndicatiorListIterator;
 
 PerformanceIndicatior * searchIndicatior(const char * name);

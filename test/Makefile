@@ -1,10 +1,6 @@
-# complie lib into target folder
-
-LDFLAGS += -L/usr/local/lib `pkg-config --libs protobuf grpc++ grpc` -Wl,--as-needed -lpthread -ldl
-
 CXXFLAGS += -std=c++11 
 
-RELATIVE_PREFIX = 
+RELATIVE_PREFIX = ../
 
 PERFORMANCE_LIB_HEADER = $(RELATIVE_PREFIX)src/performance_statistics/perfor_statistics.h
 PERFORMANCE_API_HEADER = $(RELATIVE_PREFIX)src/include/performance.h
@@ -16,13 +12,14 @@ PERFORMANCE_LIB_OBJECT_ONETIME = target/perfor_statistics_onetime.o
 PERFORMANCE_LIB_STATIC_THREAD = target/libPerformanceThread.a
 PERFORMANCE_LIB_STATIC_ONETIME = target/libPerformanceOnetime.a
 
+
 .PHONY: all clean
 
-all : consistency_check performance_statistics_lib
-	@echo "Build Success"
+all: performance_test
 
-consistency_check: target_dir 
-	@echo "Not Build consistency_check"
+performance_test:performance_statistics_lib
+	gcc -o target/test_performance_onetime performance_test.c -L./target -lPerformanceOnetime -lstdc++ 
+	gcc -o target/test_performance_thread performance_test.c -L./target -lPerformanceThread -lstdc++  -pthread
 
 performance_statistics_lib:  performance_statistics_thread_object performance_statistics_onetime_object 
 	ar -crv $(PERFORMANCE_LIB_STATIC_THREAD) $(PERFORMANCE_LIB_OBJECT_THREAD) 
@@ -44,4 +41,3 @@ target_dir :
 
 clean:
 	rm -rf target
-
