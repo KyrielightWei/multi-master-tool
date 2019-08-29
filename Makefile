@@ -2,7 +2,7 @@
 
 LDFLAGS += -L/usr/local/lib `pkg-config --libs protobuf grpc++ grpc` -Wl,--as-needed -lpthread -ldl
 
-CXXFLAGS += -std=c++11 
+CXXFLAGS += -std=c++11 -fPIC
 
 RELATIVE_PREFIX = 
 

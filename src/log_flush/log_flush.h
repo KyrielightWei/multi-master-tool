@@ -1,7 +1,7 @@
 #ifndef LOG_FLUSH_CLASS
 #define LOG_FLUSH_CLASS
 
-#include<vector>
+#include<list>
 #include<string>
 #include<fstream>
 #include<pthread.h>

@@ -2,7 +2,7 @@
 
 #include"../include/log_api.h"
 
-std::vector<LogFlush> log_list;
+std::list<LogFlush> log_list;
 
 /**
  * LogFlush
@@ -19,7 +19,7 @@ void LogFlush::getTime()
 
 void LogFlush::init(const char * zpath)
 {
-    path = std::string(zpath);
+    path = zpath;
     pthread_mutex_init(&mutex,NULL);
     output.open(path,std::ios::app | std::ios::out);
     has_init = true;
@@ -50,13 +50,19 @@ void LogFlush::log_append(const char * val)
 int log_init(const char * path)
 {
     log_list.push_back(LogFlush());
-    log_list[log_list.size()-1].init(path);
+    log_list.back().init(path);
     return log_list.size()-1;
 }
 
 void log_append(int log_num,const char * val)
 {
-    log_list[log_num].log_append(val);
+    size_t  i = 0;
+    std::list<LogFlush>::iterator it = log_list.begin();
+    for (; i < log_num; i++)
+    {
+        it++;
+    }
+    it->log_append(val);
 }
 
 int log_init_C_API(const char * path)
