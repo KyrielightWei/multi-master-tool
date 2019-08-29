@@ -30,6 +30,7 @@
         "utility": "cpp",
         "cstdarg": "cpp",
         "cstring": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "ctime": "cpp"
     }
 }

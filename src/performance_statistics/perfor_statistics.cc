@@ -6,7 +6,7 @@ std::list<PerformanceIndicatior *> per_list;
 
 #define DEBUG 
 
-/**
+/*
  * class PerformanceIndicatior
 */
 PerformanceIndicatior * PerformanceIndicatior::generateIndicator(const char * name,const char * dirPath)
@@ -161,7 +161,7 @@ bool PerformanceIndicatior::isThis(const char * name)
 
 
 
-/**
+/*
  * private function
  */
 PerformanceIndicatior * searchIndicatior(const char * name)
@@ -178,7 +178,7 @@ PerformanceIndicatior * searchIndicatior(const char * name)
 
 
 
-/**
+/*
  * API
 */
 
@@ -219,7 +219,7 @@ void finishRecord(const char * name)
     }
 }
 
-/**
+/*
  * C_API
 */
 
