@@ -18,7 +18,7 @@ PERFORMANCE_LIB_STATIC_ONETIME = target/libPerformanceOnetime.a
 
 .PHONY: all clean
 
-all : consistency_check performance_statistics_lib log_flush_lib
+all : consistency_check performance_statistics_lib log_flush_lib config_io_lib
 	@echo "Build Success"
 
 consistency_check: target_dir 
@@ -51,6 +51,20 @@ log_flush_object: target_dir
 log_flush_lib: log_flush_object
 	ar -crv $(LOG_FLUSH_STATIC_LIB) $(LOG_FLUSH_OBJECT)
 	@echo "Build log_flush"
+
+
+###### Config IO #########
+CONFIG_SOURCE = $(RELATIVE_PREFIX)src/configIO/config_io.cc
+CONFIG_OBJECT = target/config_io.o
+CONFIG_STATIC_LIB = target/libConfigIo.a
+
+config_io_object: target_dir
+	g++ -c $(CONFIG_SOURCE) -o $(CONFIG_OBJECT) $(CXXFLAGS)
+
+config_io_lib: config_io_object
+	ar -crv $(CONFIG_STATIC_LIB) $(CONFIG_OBJECT)
+	@echo "Build log_flush"
+
 
 ####### common ###########
 target_dir :

@@ -14,22 +14,23 @@
  * */
 
 #ifdef __cplusplus
-extern "C"{
-#endif
-
-void createIndicatior_C_API(const char * dirPath,const char * name);
-void addPerformanceRecord_C_API(const char * name,VALUE_TYPE val);
-void finishRecord_C_API(const char * name);
-
-
-#ifdef __cplusplus
-}
-#endif
-
 
 void createIndicatior(const char * dirPath,const char * name);
 void addPerformanceRecord(const char * name,VALUE_TYPE val);
 void finishRecord(const char * name);
+
+#endif
+
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+void createIndicatior_C_API(const char * dirPath,const char * name);
+void addPerformanceRecord_C_API(const char * name,VALUE_TYPE val);
+void finishRecord_C_API(const char * name);
+#ifdef __cplusplus
+}
+#endif
 
 //============================================================
 

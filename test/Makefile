@@ -5,7 +5,7 @@ RELATIVE_PREFIX = ../
 
 .PHONY: all clean
 
-all: performance_test log_flush_test
+all: performance_test log_flush_test config_io_test
 
 ####### Performance tool ##########
 PERFORMANCE_LIB_HEADER = $(RELATIVE_PREFIX)src/performance_statistics/perfor_statistics.h
@@ -48,6 +48,22 @@ log_flush_lib: log_flush_object
 
 log_flush_test:log_flush_lib
 	gcc -o target/test_log_flush log_flush_test.c $(TEST_LIB_FLAGS) -lLogFlush
+
+
+###### Config IO #########
+CONFIG_SOURCE = $(RELATIVE_PREFIX)src/configIO/config_io.cc
+CONFIG_OBJECT = target/config_io.o
+CONFIG_STATIC_LIB = target/libConfigIo.a
+
+config_io_object: target_dir
+	g++ -c $(CONFIG_SOURCE) -o $(CONFIG_OBJECT) $(CXXFLAGS)
+
+config_io_lib: config_io_object
+	ar -crv $(CONFIG_STATIC_LIB) $(CONFIG_OBJECT)
+	@echo "Build log_flush"
+
+config_io_test:config_io_lib
+	gcc -o target/test_config_io config_io_test.c $(TEST_LIB_FLAGS) -lConfigIo
 
 
 ####### common ###########

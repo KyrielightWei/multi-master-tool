@@ -31,6 +31,8 @@
         "cstdarg": "cpp",
         "cstring": "cpp",
         "iostream": "cpp",
-        "ctime": "cpp"
+        "ctime": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp"
     }
 }

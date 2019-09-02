@@ -1,5 +1,7 @@
 #ignore target
 target/
+test/config_output
+test/config_test
 
 #ignore LOG
 LOG
