@@ -2,6 +2,8 @@
 #include <string>
 #include <iostream>
 #include<assert.h>
+#include <sys/time.h>
+
 using namespace std;
 
 vector<string> split(const string &s, const string &seperator){
@@ -52,4 +54,11 @@ string& trim(string &s)
     s.erase(0,s.find_first_not_of(" "));
     s.erase(s.find_last_not_of(" ") + 1);
     return s;
+}
+
+long long getCurrentTime()
+{
+  struct timeval tv;
+  gettimeofday(&tv,NULL);
+  return tv.tv_sec*1000+tv.tv_usec/1000;
 }

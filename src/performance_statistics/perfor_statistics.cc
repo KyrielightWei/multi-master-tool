@@ -1,6 +1,7 @@
 
 #include "perfor_statistics.h"
 #include<iostream>
+#include "../common/common.cc"
 
 std::list<PerformanceIndicatior *> per_list;
 
@@ -9,7 +10,7 @@ std::list<PerformanceIndicatior *> per_list;
 /*
  * class PerformanceIndicatior
 */
-PerformanceIndicatior * PerformanceIndicatior::generateIndicator(const char * name,const char * dirPath)
+PerformanceIndicatior * PerformanceIndicatior::generateIndicator(const char * name,const char * dirPath,int type)
 {
     PerformanceIndicatior * newPerformance = new PerformanceIndicatior;
     newPerformance->name = name;
@@ -24,13 +25,15 @@ PerformanceIndicatior * PerformanceIndicatior::generateIndicator(const char * na
     newPerformance->count = 0;
     newPerformance->flush_index = 0;
 
+    newPerformance->performance_type = type;
+    newPerformance->record_buffer = 0;
+
 #if FLUSH_MODE==THREAD_FLUSH
     pthread_cond_init(&newPerformance->csv_cond,NULL);
     pthread_mutex_init(&newPerformance->csv_mutex,NULL);
     newPerformance->unfinish = true;
     pthread_create(&newPerformance->csv_pthread,NULL,flushThreadRun,newPerformance);
 #endif
-
     return newPerformance;
 }
 
@@ -159,7 +162,21 @@ bool PerformanceIndicatior::isThis(const char * name)
     return strcmp(this->name.c_str(),name)==0;
 }
 
+long long PerformanceIndicatior::beginTimeRecord()
+{
+    long long t = getCurrentTime();
+    record_buffer = t;
+    return t;
+}
 
+long long PerformanceIndicatior::endTimeRecord()
+{
+    long long t = getCurrentTime();
+    record_buffer = t - record_buffer;
+    addRecord(record_buffer);
+    record_buffer = 0;
+    return t;
+}
 
 /*
  * private function
@@ -191,6 +208,19 @@ void createIndicatior(const char * dirPath,const char * name)
     per_list.push_back(newIndicatior);
 }
 
+long long beginIndicatiorTimeRecord(const char * name)
+{
+    PerformanceIndicatior * current = NULL;
+    current = searchIndicatior(name);
+    current->beginTimeRecord();
+}
+
+long long endIndicatiorTimeRecord(const char * name)
+{
+    PerformanceIndicatior * current = NULL;
+    current = searchIndicatior(name);
+    current->endTimeRecord();
+}
 
 void addPerformanceRecord(const char * name,VALUE_TYPE val)
 {
@@ -237,5 +267,15 @@ void addPerformanceRecord_C_API(const char * name,VALUE_TYPE val)
 void finishRecord_C_API(const char * name)
 {
     finishRecord(name);
+}
+
+long long beginIndicatiorTimeRecord_C_API(const char * name)
+{
+    beginIndicatiorTimeRecord(name);
+}
+
+long long endIndicatiorTimeRecord_C_API(const char * name)
+{
+    endIndicatiorTimeRecord(name);
 }
 

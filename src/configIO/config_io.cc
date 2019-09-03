@@ -34,6 +34,7 @@ void ConfigFile::readConfig(const char * key)
     std::string line_key,line_val; 
 
     in.open(path, std::ios::in);
+    if(!in) return;
     std::string line_buffer;
     while (!in.eof())
     {
@@ -122,6 +123,13 @@ void initConfigFile(const char * zpath)
     config_file.init(zpath);
 }
 
+
+void initConfigFile(const char * zpath,const char * separator)
+{
+    config_file.init(zpath,separator);
+}
+
+
 void insertConfigItem(const char * key)
 {
     config_file.insertItem(key);
@@ -145,6 +153,11 @@ void outputConfig(const char * zpath)
 void initConfigFile_C_API(const char * zpath)
 {
     initConfigFile(zpath);
+}
+
+void initConfigFile_C_API_SEP(const char * zpath,const char * separator)
+{
+    initConfigFile(zpath,separator);
 }
 
 void insertConfigItem_C_API(const char * key)
