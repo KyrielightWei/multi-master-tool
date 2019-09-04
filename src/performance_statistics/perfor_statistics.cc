@@ -1,11 +1,11 @@
 
 #include "perfor_statistics.h"
 #include<iostream>
-#include "../common/common.cc"
+#include "../common/common.h"
 
 std::list<PerformanceIndicatior *> per_list;
 
-#define DEBUG 
+//#define DEBUG 
 
 /*
  * class PerformanceIndicatior
@@ -108,7 +108,7 @@ void PerformanceIndicatior::flushCsv(uint64_t n)
         flush_start_iterator++;
     }
     //std::string message = name + " -- Performance Record has already finish";
-    assert(flush_start_iterator != record_list.end());
+    assert(record_list.empty()  || flush_start_iterator != record_list.end());
    
     for(uint64_t i =0; i < flushCount;i++)
     {

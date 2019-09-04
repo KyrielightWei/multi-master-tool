@@ -1,10 +1,4 @@
-#include <vector>
-#include <string>
-#include <iostream>
-#include<assert.h>
-#include <sys/time.h>
-
-using namespace std;
+#include "common.h"
 
 vector<string> split(const string &s, const string &seperator){
   vector<string> result;
@@ -62,3 +56,4 @@ long long getCurrentTime()
   gettimeofday(&tv,NULL);
   return tv.tv_sec*1000+tv.tv_usec/1000;
 }
+

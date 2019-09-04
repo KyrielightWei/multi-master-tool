@@ -1,6 +1,6 @@
 #include "../include/config_io_api.h"
 #include "config_io.h"
-#include "../common/common.cc"
+#include "../common/common.h"
 
 #include<string>
 #include<fstream>

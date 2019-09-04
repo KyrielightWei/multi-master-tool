@@ -7,6 +7,12 @@ RELATIVE_PREFIX = ../
 
 all: performance_test log_flush_test config_io_test
 
+######## common function #######
+COMMON_SOURCE = $(RELATIVE_PREFIX)src/common/common.cc
+COMMON_OBJECT = target/common.o
+common_function_object: target_dir
+	g++ -c $(COMMON_SOURCE) -o $(COMMON_OBJECT) $(CXXFLAGS)
+
 ####### Performance tool ##########
 PERFORMANCE_LIB_HEADER = $(RELATIVE_PREFIX)src/performance_statistics/perfor_statistics.h
 PERFORMANCE_API_HEADER = $(RELATIVE_PREFIX)src/include/performance.h
@@ -21,9 +27,9 @@ performance_test:performance_statistics_lib
 	gcc -o target/test_performance_onetime performance_test.c  $(TEST_LIB_FLAGS) -lPerformanceOnetime
 	gcc -o target/test_performance_thread performance_test.c $(TEST_LIB_FLAGS) -lPerformanceThread 
 
-performance_statistics_lib:  performance_statistics_thread_object performance_statistics_onetime_object 
-	ar -crv $(PERFORMANCE_LIB_STATIC_THREAD) $(PERFORMANCE_LIB_OBJECT_THREAD) 
-	ar -crv $(PERFORMANCE_LIB_STATIC_ONETIME) $(PERFORMANCE_LIB_OBJECT_ONETIME) 
+performance_statistics_lib:  performance_statistics_thread_object performance_statistics_onetime_object common_function_object
+	ar -crv $(PERFORMANCE_LIB_STATIC_THREAD) $(PERFORMANCE_LIB_OBJECT_THREAD)  $(COMMON_OBJECT)
+	ar -crv $(PERFORMANCE_LIB_STATIC_ONETIME) $(PERFORMANCE_LIB_OBJECT_ONETIME) $(COMMON_OBJECT)
 	@echo "Build performance_statistics"
 
 performance_statistics_thread_object: target_dir
@@ -42,7 +48,7 @@ LOG_FLUSH_STATIC_LIB = target/libLogFlush.a
 log_flush_object: target_dir
 	g++ -c $(LOG_FLUSH_SOURCE) -o $(LOG_FLUSH_OBJECT) $(CXXFLAGS)
 
-log_flush_lib: log_flush_object
+log_flush_lib: log_flush_object 
 	ar -crv $(LOG_FLUSH_STATIC_LIB) $(LOG_FLUSH_OBJECT)
 	@echo "Build log_flush"
 
@@ -58,9 +64,9 @@ CONFIG_STATIC_LIB = target/libConfigIo.a
 config_io_object: target_dir
 	g++ -c $(CONFIG_SOURCE) -o $(CONFIG_OBJECT) $(CXXFLAGS)
 
-config_io_lib: config_io_object
-	ar -crv $(CONFIG_STATIC_LIB) $(CONFIG_OBJECT)
-	@echo "Build log_flush"
+config_io_lib: config_io_object common_function_object
+	ar -crv $(CONFIG_STATIC_LIB) $(CONFIG_OBJECT) $(COMMON_OBJECT)
+	@echo "Build Config IO"
 
 config_io_test:config_io_lib
 	gcc -o target/test_config_io config_io_test.c $(TEST_LIB_FLAGS) -lConfigIo
