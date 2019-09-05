@@ -164,14 +164,14 @@ bool PerformanceIndicatior::isThis(const char * name)
 
 long long PerformanceIndicatior::beginTimeRecord()
 {
-    long long t = getCurrentTime();
+    long long t = getCurrentTime_us();
     record_buffer = t;
     return t;
 }
 
 long long PerformanceIndicatior::endTimeRecord()
 {
-    long long t = getCurrentTime();
+    long long t = getCurrentTime_us();
     record_buffer = t - record_buffer;
     addRecord(record_buffer);
     record_buffer = 0;

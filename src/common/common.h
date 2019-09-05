@@ -14,6 +14,7 @@ vector<string> split(const string &s, const string &seperator);
 
 string& trim(string &s) ;
 
-long long getCurrentTime();
+long long getCurrentTime_ms();
+long long getCurrentTime_us();
 
 #endif // !COMMON_FUNCTION_HEADER
