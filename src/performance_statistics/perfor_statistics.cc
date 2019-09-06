@@ -1,15 +1,16 @@
 
 #include "perfor_statistics.h"
 #include<iostream>
+#include "../common/common.h"
 
 std::list<PerformanceIndicatior *> per_list;
 
-#define DEBUG 
+//#define DEBUG 
 
-/**
+/*
  * class PerformanceIndicatior
 */
-PerformanceIndicatior * PerformanceIndicatior::generateIndicator(const char * name,const char * dirPath)
+PerformanceIndicatior * PerformanceIndicatior::generateIndicator(const char * name,const char * dirPath,int type)
 {
     PerformanceIndicatior * newPerformance = new PerformanceIndicatior;
     newPerformance->name = name;
@@ -24,13 +25,16 @@ PerformanceIndicatior * PerformanceIndicatior::generateIndicator(const char * na
     newPerformance->count = 0;
     newPerformance->flush_index = 0;
 
+    newPerformance->performance_type = type;
+    newPerformance->record_buffer = 0;
+
 #if FLUSH_MODE==THREAD_FLUSH
     pthread_cond_init(&newPerformance->csv_cond,NULL);
     pthread_mutex_init(&newPerformance->csv_mutex,NULL);
     newPerformance->unfinish = true;
+    newPerformance->nowflush = false;
     pthread_create(&newPerformance->csv_pthread,NULL,flushThreadRun,newPerformance);
 #endif
-
     return newPerformance;
 }
 
@@ -40,7 +44,7 @@ void PerformanceIndicatior::flushOrSleep()
 {
     
     pthread_mutex_lock(&csv_mutex);
-    while (count - flush_index < THREAD_FLUSH_UNIT && unfinish)
+    while (count - flush_index < THREAD_FLUSH_UNIT && unfinish && !nowflush)
     {
         pthread_cond_wait(&csv_cond,&csv_mutex);
     }
@@ -60,10 +64,19 @@ void * PerformanceIndicatior::flushThreadRun(void * file)
     while (1)
     {
         performanceI->flushOrSleep();
+        if(performanceI->nowflush)
+        {
+#ifdef DEBUG
+    std::cout << performanceI->name <<"######" << performanceI->flush_index << std::endl;
+#endif // DEBUG
+            performanceI->flushCsv(0);
+            performanceI->nowflush = false;
+            continue; 
+        }
         if(performanceI->unfinish)
         {
             performanceI->flushCsv(THREAD_FLUSH_UNIT);
-            performanceI->flush_index = performanceI->flush_index + THREAD_FLUSH_UNIT;
+            //performanceI->flush_index = performanceI->flush_index + THREAD_FLUSH_UNIT;
         }
         else
         {
@@ -105,7 +118,7 @@ void PerformanceIndicatior::flushCsv(uint64_t n)
         flush_start_iterator++;
     }
     //std::string message = name + " -- Performance Record has already finish";
-    assert(flush_start_iterator != record_list.end());
+    assert(record_list.empty()  || flush_start_iterator != record_list.end());
    
     for(uint64_t i =0; i < flushCount;i++)
     {
@@ -114,6 +127,7 @@ void PerformanceIndicatior::flushCsv(uint64_t n)
             flush_start_iterator++;
     }
     output_csv.close();
+    flush_index = flush_index + flushCount;
 }
 
 void PerformanceIndicatior::addRecord(VALUE_TYPE val)
@@ -154,14 +168,43 @@ void PerformanceIndicatior::finishRecord()
     flush_start_iterator = record_list.end();
 }
 
+void PerformanceIndicatior::flushNow()
+{
+#ifdef DEBUG
+    std::cout << name <<"------" << record_list.size()<< std::endl;
+#endif // DEBUG
+#if FLUSH_MODE==THREAD_FLUSH
+    pthread_mutex_lock(&csv_mutex);
+    nowflush = true;
+    pthread_mutex_unlock(&csv_mutex);
+    pthread_cond_signal(&csv_cond);
+#else
+    flushCsv(0);
+#endif    
+}
+
 bool PerformanceIndicatior::isThis(const char * name)
 {
     return strcmp(this->name.c_str(),name)==0;
 }
 
+long long PerformanceIndicatior::beginTimeRecord()
+{
+    long long t = getCurrentTime_us();
+    record_buffer = t;
+    return t;
+}
 
+long long PerformanceIndicatior::endTimeRecord()
+{
+    long long t = getCurrentTime_us();
+    record_buffer = t - record_buffer;
+    addRecord(record_buffer);
+    record_buffer = 0;
+    return t;
+}
 
-/**
+/*
  * private function
  */
 PerformanceIndicatior * searchIndicatior(const char * name)
@@ -178,7 +221,7 @@ PerformanceIndicatior * searchIndicatior(const char * name)
 
 
 
-/**
+/*
  * API
 */
 
@@ -191,6 +234,19 @@ void createIndicatior(const char * dirPath,const char * name)
     per_list.push_back(newIndicatior);
 }
 
+long long beginIndicatiorTimeRecord(const char * name)
+{
+    PerformanceIndicatior * current = NULL;
+    current = searchIndicatior(name);
+    current->beginTimeRecord();
+}
+
+long long endIndicatiorTimeRecord(const char * name)
+{
+    PerformanceIndicatior * current = NULL;
+    current = searchIndicatior(name);
+    current->endTimeRecord();
+}
 
 void addPerformanceRecord(const char * name,VALUE_TYPE val)
 {
@@ -219,7 +275,23 @@ void finishRecord(const char * name)
     }
 }
 
-/**
+void flushNow(const char * name)
+{
+    if(name == NULL)
+    {
+        for (IndicatiorListIterator i = per_list.begin(); i != per_list.end(); i++)
+        {
+            (*i)->flushNow();
+        }
+    }
+    else
+    {
+        PerformanceIndicatior * indicatior = searchIndicatior(name);
+        indicatior->flushNow();
+    }
+}
+
+/*
  * C_API
 */
 
@@ -239,3 +311,17 @@ void finishRecord_C_API(const char * name)
     finishRecord(name);
 }
 
+long long beginIndicatiorTimeRecord_C_API(const char * name)
+{
+    beginIndicatiorTimeRecord(name);
+}
+
+long long endIndicatiorTimeRecord_C_API(const char * name)
+{
+    endIndicatiorTimeRecord(name);
+}
+
+void flushNow_C_API(const char * name)
+{
+    flushNow(name);
+}

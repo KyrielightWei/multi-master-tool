@@ -8,7 +8,7 @@
 #include<fstream>
 #include<cassert>
 #include<cstring>
-#include"../include/performance.h"
+#include"../include/performance_api.h"
 
 /**
  * We have two modes to flush statistics data into File:
@@ -44,7 +44,7 @@ private:
     std::ofstream output_csv;
 
 #if FLUSH_MODE==THREAD_FLUSH
-   
+    bool nowflush;
     bool unfinish;
     pthread_t csv_pthread;
     pthread_cond_t csv_cond;
@@ -54,11 +54,18 @@ private:
     static void * flushThreadRun(void * file);
 #endif 
    void flushCsv(uint64_t n);
+   
+   int performance_type;
+
+   VALUE_TYPE record_buffer;
 
 public:
-    static PerformanceIndicatior * generateIndicator(const char * name,const char * dirPath);
+    static PerformanceIndicatior * generateIndicator(const char * name,const char * dirPath,int type = PERFORMANCE_TIME);
 
+    void flushNow();
     bool isThis(const char * name);
+    long long beginTimeRecord();
+    long long endTimeRecord();
     void addRecord(VALUE_TYPE val);
     void finishRecord();
 };

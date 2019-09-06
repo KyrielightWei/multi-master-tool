@@ -1,5 +1,9 @@
 #ignore target
 target/
+test/config_output
+test/config_test
+test/test_indicatior.csv
+test/time_indicatior.csv
 
 #ignore LOG
 LOG
