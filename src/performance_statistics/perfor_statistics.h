@@ -44,7 +44,7 @@ private:
     std::ofstream output_csv;
 
 #if FLUSH_MODE==THREAD_FLUSH
-   
+    bool nowflush;
     bool unfinish;
     pthread_t csv_pthread;
     pthread_cond_t csv_cond;
@@ -62,6 +62,7 @@ private:
 public:
     static PerformanceIndicatior * generateIndicator(const char * name,const char * dirPath,int type = PERFORMANCE_TIME);
 
+    void flushNow();
     bool isThis(const char * name);
     long long beginTimeRecord();
     long long endTimeRecord();

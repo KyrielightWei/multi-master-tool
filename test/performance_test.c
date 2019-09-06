@@ -26,8 +26,14 @@ int main()
         temp = endIndicatiorTimeRecord_C_API("time_indicatior");
         printf("end: %ld  \n",temp);
     }
-    
-    finishRecord_C_API(NULL);
 
+    flushNow_C_API(NULL);
+   // finishRecord_C_API(NULL);
+   
+   while (1)
+   {
+       /* code */
+   }
+   
     return 0;
 }

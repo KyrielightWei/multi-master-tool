@@ -32,6 +32,7 @@ PerformanceIndicatior * PerformanceIndicatior::generateIndicator(const char * na
     pthread_cond_init(&newPerformance->csv_cond,NULL);
     pthread_mutex_init(&newPerformance->csv_mutex,NULL);
     newPerformance->unfinish = true;
+    newPerformance->nowflush = false;
     pthread_create(&newPerformance->csv_pthread,NULL,flushThreadRun,newPerformance);
 #endif
     return newPerformance;
@@ -43,7 +44,7 @@ void PerformanceIndicatior::flushOrSleep()
 {
     
     pthread_mutex_lock(&csv_mutex);
-    while (count - flush_index < THREAD_FLUSH_UNIT && unfinish)
+    while (count - flush_index < THREAD_FLUSH_UNIT && unfinish && !nowflush)
     {
         pthread_cond_wait(&csv_cond,&csv_mutex);
     }
@@ -63,10 +64,19 @@ void * PerformanceIndicatior::flushThreadRun(void * file)
     while (1)
     {
         performanceI->flushOrSleep();
+        if(performanceI->nowflush)
+        {
+#ifdef DEBUG
+    std::cout << performanceI->name <<"######" << performanceI->flush_index << std::endl;
+#endif // DEBUG
+            performanceI->flushCsv(0);
+            performanceI->nowflush = false;
+            continue; 
+        }
         if(performanceI->unfinish)
         {
             performanceI->flushCsv(THREAD_FLUSH_UNIT);
-            performanceI->flush_index = performanceI->flush_index + THREAD_FLUSH_UNIT;
+            //performanceI->flush_index = performanceI->flush_index + THREAD_FLUSH_UNIT;
         }
         else
         {
@@ -117,6 +127,7 @@ void PerformanceIndicatior::flushCsv(uint64_t n)
             flush_start_iterator++;
     }
     output_csv.close();
+    flush_index = flush_index + flushCount;
 }
 
 void PerformanceIndicatior::addRecord(VALUE_TYPE val)
@@ -155,6 +166,21 @@ void PerformanceIndicatior::finishRecord()
     count = 0;
     flush_index = 0;
     flush_start_iterator = record_list.end();
+}
+
+void PerformanceIndicatior::flushNow()
+{
+#ifdef DEBUG
+    std::cout << name <<"------" << record_list.size()<< std::endl;
+#endif // DEBUG
+#if FLUSH_MODE==THREAD_FLUSH
+    pthread_mutex_lock(&csv_mutex);
+    nowflush = true;
+    pthread_mutex_unlock(&csv_mutex);
+    pthread_cond_signal(&csv_cond);
+#else
+    flushCsv(0);
+#endif    
 }
 
 bool PerformanceIndicatior::isThis(const char * name)
@@ -249,6 +275,22 @@ void finishRecord(const char * name)
     }
 }
 
+void flushNow(const char * name)
+{
+    if(name == NULL)
+    {
+        for (IndicatiorListIterator i = per_list.begin(); i != per_list.end(); i++)
+        {
+            (*i)->flushNow();
+        }
+    }
+    else
+    {
+        PerformanceIndicatior * indicatior = searchIndicatior(name);
+        indicatior->flushNow();
+    }
+}
+
 /*
  * C_API
 */
@@ -279,3 +321,7 @@ long long endIndicatiorTimeRecord_C_API(const char * name)
     endIndicatiorTimeRecord(name);
 }
 
+void flushNow_C_API(const char * name)
+{
+    flushNow(name);
+}
