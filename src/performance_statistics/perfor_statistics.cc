@@ -115,10 +115,20 @@ void PerformanceIndicatior::flushCsv(uint64_t n)
     }
     else
     {
+        RecordListIterator it  = flush_start_iterator;
+        it++;
+        if(it == record_list.end())
+        {
+            return ;
+        }
+    #ifdef DEBUG
+        std::cout << "flushindex: " << flush_index << "ListSize: "<< record_list.size() << std::endl;
+
+    #endif // DEBUG
         flush_start_iterator++;
     }
     //std::string message = name + " -- Performance Record has already finish";
-    assert(record_list.empty()  || flush_start_iterator != record_list.end());
+    //assert(record_list.empty()  || flush_start_iterator != record_list.end());
    
     for(uint64_t i =0; i < flushCount;i++)
     {
