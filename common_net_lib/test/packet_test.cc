@@ -11,5 +11,7 @@ int main(void)
     SimplePacket<string> strPacket(mess);
     std::cout << *(string *)strPacket.get_val_ptr() << endl;
 
+    // std::cout << testINT() << endl;
+
     return 0;
 }

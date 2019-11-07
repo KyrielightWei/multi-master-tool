@@ -4,6 +4,9 @@
 */
 #include<string>
 
+
+// int testINT();
+
 /**
  * ToDo
  * NetWork基类需要的接口
@@ -70,3 +73,25 @@ class NetworkHandle
     
 };
 
+
+/*************************************************************
+ *      Class SimplePacket<T> implementation
+ * ***********************************************************
+*/
+template<typename T>
+void * SimplePacket<T>::get_val_ptr()
+{
+    return (void *)&value;
+}
+
+template<typename T>
+void SimplePacket<T>::set_val(const T & val)
+{
+    value = val;
+}
+
+template<typename T>
+unsigned int SimplePacket<T>::get_packet_size()
+{
+    return sizeof(T);
+}
