@@ -91,14 +91,14 @@ test/fast: test
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dev/gitLocal/multi-master-tool/common_net_lib/CMakeFiles /home/dev/gitLocal/multi-master-tool/common_net_lib/CMakeFiles/progress.marks
-	$(MAKE) -f CMakeFiles/Makefile2 all
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(CMAKE_COMMAND) -E cmake_progress_start /home/dev/gitLocal/multi-master-tool/common_net_lib/CMakeFiles /home/dev/gitLocal/multi-master-tool/common_net_lib/src/CMakeFiles/progress.marks
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/dev/gitLocal/multi-master-tool/common_net_lib/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	$(MAKE) -f CMakeFiles/Makefile2 clean
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/clean
 .PHONY : clean
 
 # The main clean target
@@ -108,57 +108,60 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
-#=============================================================================
-# Target rules for targets named common_net_lib
+# Convenience name for target.
+src/CMakeFiles/common_net_lib.dir/rule:
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/common_net_lib.dir/rule
+.PHONY : src/CMakeFiles/common_net_lib.dir/rule
 
-# Build rule for target.
-common_net_lib: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 common_net_lib
+# Convenience name for target.
+common_net_lib: src/CMakeFiles/common_net_lib.dir/rule
+
 .PHONY : common_net_lib
 
 # fast build rule for target.
 common_net_lib/fast:
-	$(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/build
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/build
 .PHONY : common_net_lib/fast
 
-#=============================================================================
-# Target rules for targets named json_test_target
+network_handle.o: network_handle.cc.o
 
-# Build rule for target.
-json_test_target: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 json_test_target
-.PHONY : json_test_target
+.PHONY : network_handle.o
 
-# fast build rule for target.
-json_test_target/fast:
-	$(MAKE) -f test/CMakeFiles/json_test_target.dir/build.make test/CMakeFiles/json_test_target.dir/build
-.PHONY : json_test_target/fast
+# target to build an object file
+network_handle.cc.o:
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/network_handle.cc.o
+.PHONY : network_handle.cc.o
 
-#=============================================================================
-# Target rules for targets named packet_test_target
+network_handle.i: network_handle.cc.i
 
-# Build rule for target.
-packet_test_target: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 packet_test_target
-.PHONY : packet_test_target
+.PHONY : network_handle.i
 
-# fast build rule for target.
-packet_test_target/fast:
-	$(MAKE) -f test/CMakeFiles/packet_test_target.dir/build.make test/CMakeFiles/packet_test_target.dir/build
-.PHONY : packet_test_target/fast
+# target to preprocess a source file
+network_handle.cc.i:
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/network_handle.cc.i
+.PHONY : network_handle.cc.i
+
+network_handle.s: network_handle.cc.s
+
+.PHONY : network_handle.s
+
+# target to generate assembly for a file
+network_handle.cc.s:
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/network_handle.cc.s
+.PHONY : network_handle.cc.s
 
 # Help Target
 help:
@@ -170,8 +173,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... test"
 	@echo "... common_net_lib"
-	@echo "... json_test_target"
-	@echo "... packet_test_target"
+	@echo "... network_handle.o"
+	@echo "... network_handle.i"
+	@echo "... network_handle.s"
 .PHONY : help
 
 
@@ -183,6 +187,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

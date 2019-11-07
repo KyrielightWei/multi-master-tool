@@ -1,3 +1,10 @@
+
+#ignore cmake build files
+CMakeFiles/
+*.cmake
+CMakeCache.txt
+Testing
+
 #ignore target
 target/
 test/config_output
@@ -34,7 +41,7 @@ out/
 
 # Vscode files
 .vscode/**
-!.vscode/*.json
+#!.vscode/*.json
 
 tmp
 /bin

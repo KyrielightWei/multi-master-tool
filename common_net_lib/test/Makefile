@@ -56,6 +56,17 @@ CMAKE_BINARY_DIR = /home/dev/gitLocal/multi-master-tool/common_net_lib
 #=============================================================================
 # Targets provided globally by CMake.
 
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/home/dev/ENV/cmake/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
+
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
@@ -77,17 +88,6 @@ test:
 test/fast: test
 
 .PHONY : test/fast
-
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/home/dev/ENV/cmake/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -136,32 +136,74 @@ json_test_target/fast:
 	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f test/CMakeFiles/json_test_target.dir/build.make test/CMakeFiles/json_test_target.dir/build
 .PHONY : json_test_target/fast
 
-json_test.o: json_test.cpp.o
+# Convenience name for target.
+test/CMakeFiles/packet_test_target.dir/rule:
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 test/CMakeFiles/packet_test_target.dir/rule
+.PHONY : test/CMakeFiles/packet_test_target.dir/rule
+
+# Convenience name for target.
+packet_test_target: test/CMakeFiles/packet_test_target.dir/rule
+
+.PHONY : packet_test_target
+
+# fast build rule for target.
+packet_test_target/fast:
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f test/CMakeFiles/packet_test_target.dir/build.make test/CMakeFiles/packet_test_target.dir/build
+.PHONY : packet_test_target/fast
+
+json_test.o: json_test.cc.o
 
 .PHONY : json_test.o
 
 # target to build an object file
-json_test.cpp.o:
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f test/CMakeFiles/json_test_target.dir/build.make test/CMakeFiles/json_test_target.dir/json_test.cpp.o
-.PHONY : json_test.cpp.o
+json_test.cc.o:
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f test/CMakeFiles/json_test_target.dir/build.make test/CMakeFiles/json_test_target.dir/json_test.cc.o
+.PHONY : json_test.cc.o
 
-json_test.i: json_test.cpp.i
+json_test.i: json_test.cc.i
 
 .PHONY : json_test.i
 
 # target to preprocess a source file
-json_test.cpp.i:
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f test/CMakeFiles/json_test_target.dir/build.make test/CMakeFiles/json_test_target.dir/json_test.cpp.i
-.PHONY : json_test.cpp.i
+json_test.cc.i:
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f test/CMakeFiles/json_test_target.dir/build.make test/CMakeFiles/json_test_target.dir/json_test.cc.i
+.PHONY : json_test.cc.i
 
-json_test.s: json_test.cpp.s
+json_test.s: json_test.cc.s
 
 .PHONY : json_test.s
 
 # target to generate assembly for a file
-json_test.cpp.s:
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f test/CMakeFiles/json_test_target.dir/build.make test/CMakeFiles/json_test_target.dir/json_test.cpp.s
-.PHONY : json_test.cpp.s
+json_test.cc.s:
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f test/CMakeFiles/json_test_target.dir/build.make test/CMakeFiles/json_test_target.dir/json_test.cc.s
+.PHONY : json_test.cc.s
+
+packet_test.o: packet_test.cc.o
+
+.PHONY : packet_test.o
+
+# target to build an object file
+packet_test.cc.o:
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f test/CMakeFiles/packet_test_target.dir/build.make test/CMakeFiles/packet_test_target.dir/packet_test.cc.o
+.PHONY : packet_test.cc.o
+
+packet_test.i: packet_test.cc.i
+
+.PHONY : packet_test.i
+
+# target to preprocess a source file
+packet_test.cc.i:
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f test/CMakeFiles/packet_test_target.dir/build.make test/CMakeFiles/packet_test_target.dir/packet_test.cc.i
+.PHONY : packet_test.cc.i
+
+packet_test.s: packet_test.cc.s
+
+.PHONY : packet_test.s
+
+# target to generate assembly for a file
+packet_test.cc.s:
+	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f test/CMakeFiles/packet_test_target.dir/build.make test/CMakeFiles/packet_test_target.dir/packet_test.cc.s
+.PHONY : packet_test.cc.s
 
 # Help Target
 help:
@@ -169,13 +211,17 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... edit_cache"
-	@echo "... test"
 	@echo "... rebuild_cache"
 	@echo "... json_test_target"
+	@echo "... packet_test_target"
+	@echo "... edit_cache"
+	@echo "... test"
 	@echo "... json_test.o"
 	@echo "... json_test.i"
 	@echo "... json_test.s"
+	@echo "... packet_test.o"
+	@echo "... packet_test.i"
+	@echo "... packet_test.s"
 .PHONY : help
 
 
