@@ -1,0 +1,13 @@
+[2019-11-20 13:38:23.499] [async_file_logger] [info] test log message
+[2019-11-20 14:01:05.764] [test_log] [error] test log message
+[2019-11-20 14:02:14.481] [test_log] [error] test log message
+[2019-11-20 14:08:18.219] [test_log] [warning] test log message
+[2019-11-20 14:18:44.362] [/home/weixiaoxian/percona/multi-master-tool/easy_logger/test_main.cc : 10] [warning] test log message
+[2019-11-20 14:18:44.362] [test_log] [warning] test log message
+[2019-11-20 14:19:16.307] [/home/weixiaoxian/percona/multi-master-tool/easy_logger/test_main.cc : 10] [warning] test log message
+[2019-11-20 14:19:16.307] [test_log] [warning] test log message
+[2019-11-20 14:19:18.663] [/home/weixiaoxian/percona/multi-master-tool/easy_logger/test_main.cc : 10] [warning] test log message
+[2019-11-20 14:19:18.663] [test_log] [warning] test log message
+[2019-11-20 14:19:57.351] [/home/weixiaoxian/percona/multi-master-tool/easy_logger/test_main.cc : 10] [warning] test log message
+[2019-11-20 14:19:57.351] [/home/weixiaoxian/percona/multi-master-tool/easy_logger/test_main.cc : 11] [error] test log message
+[2019-11-20 14:19:57.351] [test_log] [warning] test log message
