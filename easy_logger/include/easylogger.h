@@ -22,7 +22,26 @@ class EasyLogger
         error,
     };
 
-    virtual ~EasyLogger();
+    virtual ~EasyLogger()
+    {
+        auto s = m_oss.str();
+        switch (m_level)
+        {
+        case LOG_LEVEL::info:
+            async_log->info(s);
+            break;
+        case LOG_LEVEL::debug:
+            async_log->debug(s);
+        case LOG_LEVEL::warn:
+            async_log->warn(s);
+            break;
+        case LOG_LEVEL::error:
+            async_log->error(s);
+            break;
+        default:
+            break;
+        }
+    };
     
     template <typename T>
     EasyLogger &operator<<(const T &rhs) {
@@ -61,27 +80,6 @@ class EasyLogger
 
 #define EasyLoggerWithTrace(p,l)             \
         EasyLogger(__FILE__, __LINE__,p,l)
-
-EasyLogger::~EasyLogger()
-{
-    auto s = m_oss.str();
-    switch (m_level)
-    {
-    case LOG_LEVEL::info:
-        async_log->info(s);
-        break;
-    case LOG_LEVEL::debug:
-        async_log->debug(s);
-    case LOG_LEVEL::warn:
-        async_log->warn(s);
-        break;
-    case LOG_LEVEL::error:
-        async_log->error(s);
-        break;
-    default:
-        break;
-    }
-}
 
 
 #endif // !EASY_LOGGER_HEADER
