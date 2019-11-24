@@ -39,19 +39,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/dev/ENV/cmake/bin/cmake
+CMAKE_COMMAND = /home/weixiaoxian/percona/percona_env/cmake/bin/cmake
 
 # The command to remove a file.
-RM = /home/dev/ENV/cmake/bin/cmake -E remove -f
+RM = /home/weixiaoxian/percona/percona_env/cmake/bin/cmake -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dev/gitLocal/multi-master-tool/common_net_lib
+CMAKE_SOURCE_DIR = /home/weixiaoxian/percona/multi-master-tool/common_net_lib
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dev/gitLocal/multi-master-tool/common_net_lib
+CMAKE_BINARY_DIR = /home/weixiaoxian/percona/multi-master-tool/common_net_lib
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -59,7 +59,7 @@ CMAKE_BINARY_DIR = /home/dev/gitLocal/multi-master-tool/common_net_lib
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/home/dev/ENV/cmake/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/home/weixiaoxian/percona/percona_env/cmake/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -70,7 +70,7 @@ rebuild_cache/fast: rebuild_cache
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/home/dev/ENV/cmake/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/home/weixiaoxian/percona/percona_env/cmake/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -81,7 +81,7 @@ edit_cache/fast: edit_cache
 # Special rule for the target test
 test:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	/home/dev/ENV/cmake/bin/ctest --force-new-ctest-process $(ARGS)
+	/home/weixiaoxian/percona/percona_env/cmake/bin/ctest --force-new-ctest-process $(ARGS)
 .PHONY : test
 
 # Special rule for the target test
@@ -91,9 +91,9 @@ test/fast: test
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dev/gitLocal/multi-master-tool/common_net_lib/CMakeFiles /home/dev/gitLocal/multi-master-tool/common_net_lib/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/weixiaoxian/percona/multi-master-tool/common_net_lib/CMakeFiles /home/weixiaoxian/percona/multi-master-tool/common_net_lib/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dev/gitLocal/multi-master-tool/common_net_lib/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/weixiaoxian/percona/multi-master-tool/common_net_lib/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -122,6 +122,45 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named event_core
+
+# Build rule for target.
+event_core: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 event_core
+.PHONY : event_core
+
+# fast build rule for target.
+event_core/fast:
+	$(MAKE) -f extra/libevent/CMakeFiles/event_core.dir/build.make extra/libevent/CMakeFiles/event_core.dir/build
+.PHONY : event_core/fast
+
+#=============================================================================
+# Target rules for targets named event
+
+# Build rule for target.
+event: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 event
+.PHONY : event
+
+# fast build rule for target.
+event/fast:
+	$(MAKE) -f extra/libevent/CMakeFiles/event.dir/build.make extra/libevent/CMakeFiles/event.dir/build
+.PHONY : event/fast
+
+#=============================================================================
+# Target rules for targets named event_extra
+
+# Build rule for target.
+event_extra: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 event_extra
+.PHONY : event_extra
+
+# fast build rule for target.
+event_extra/fast:
+	$(MAKE) -f extra/libevent/CMakeFiles/event_extra.dir/build.make extra/libevent/CMakeFiles/event_extra.dir/build
+.PHONY : event_extra/fast
+
+#=============================================================================
 # Target rules for targets named common_net_lib
 
 # Build rule for target.
@@ -148,6 +187,19 @@ json_test_target/fast:
 .PHONY : json_test_target/fast
 
 #=============================================================================
+# Target rules for targets named libevent_test_target
+
+# Build rule for target.
+libevent_test_target: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 libevent_test_target
+.PHONY : libevent_test_target
+
+# fast build rule for target.
+libevent_test_target/fast:
+	$(MAKE) -f test/CMakeFiles/libevent_test_target.dir/build.make test/CMakeFiles/libevent_test_target.dir/build
+.PHONY : libevent_test_target/fast
+
+#=============================================================================
 # Target rules for targets named packet_test_target
 
 # Build rule for target.
@@ -160,6 +212,19 @@ packet_test_target/fast:
 	$(MAKE) -f test/CMakeFiles/packet_test_target.dir/build.make test/CMakeFiles/packet_test_target.dir/build
 .PHONY : packet_test_target/fast
 
+#=============================================================================
+# Target rules for targets named server_test_target
+
+# Build rule for target.
+server_test_target: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 server_test_target
+.PHONY : server_test_target
+
+# fast build rule for target.
+server_test_target/fast:
+	$(MAKE) -f test/CMakeFiles/server_test_target.dir/build.make test/CMakeFiles/server_test_target.dir/build
+.PHONY : server_test_target/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -169,9 +234,14 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... test"
+	@echo "... event_core"
+	@echo "... event"
+	@echo "... event_extra"
 	@echo "... common_net_lib"
 	@echo "... json_test_target"
+	@echo "... libevent_test_target"
 	@echo "... packet_test_target"
+	@echo "... server_test_target"
 .PHONY : help
 
 

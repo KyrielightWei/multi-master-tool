@@ -39,19 +39,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/dev/ENV/cmake/bin/cmake
+CMAKE_COMMAND = /home/weixiaoxian/percona/percona_env/cmake/bin/cmake
 
 # The command to remove a file.
-RM = /home/dev/ENV/cmake/bin/cmake -E remove -f
+RM = /home/weixiaoxian/percona/percona_env/cmake/bin/cmake -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dev/gitLocal/multi-master-tool/common_net_lib
+CMAKE_SOURCE_DIR = /home/weixiaoxian/percona/multi-master-tool/common_net_lib
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dev/gitLocal/multi-master-tool/common_net_lib
+CMAKE_BINARY_DIR = /home/weixiaoxian/percona/multi-master-tool/common_net_lib
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -59,7 +59,7 @@ CMAKE_BINARY_DIR = /home/dev/gitLocal/multi-master-tool/common_net_lib
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/home/dev/ENV/cmake/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/home/weixiaoxian/percona/percona_env/cmake/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -70,7 +70,7 @@ rebuild_cache/fast: rebuild_cache
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/home/dev/ENV/cmake/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/home/weixiaoxian/percona/percona_env/cmake/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -81,7 +81,7 @@ edit_cache/fast: edit_cache
 # Special rule for the target test
 test:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	/home/dev/ENV/cmake/bin/ctest --force-new-ctest-process $(ARGS)
+	/home/weixiaoxian/percona/percona_env/cmake/bin/ctest --force-new-ctest-process $(ARGS)
 .PHONY : test
 
 # Special rule for the target test
@@ -91,14 +91,14 @@ test/fast: test
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(CMAKE_COMMAND) -E cmake_progress_start /home/dev/gitLocal/multi-master-tool/common_net_lib/CMakeFiles /home/dev/gitLocal/multi-master-tool/common_net_lib/src/CMakeFiles/progress.marks
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dev/gitLocal/multi-master-tool/common_net_lib/CMakeFiles 0
+	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(CMAKE_COMMAND) -E cmake_progress_start /home/weixiaoxian/percona/multi-master-tool/common_net_lib/CMakeFiles /home/weixiaoxian/percona/multi-master-tool/common_net_lib/src/CMakeFiles/progress.marks
+	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/weixiaoxian/percona/multi-master-tool/common_net_lib/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/clean
+	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/clean
 .PHONY : clean
 
 # The main clean target
@@ -108,22 +108,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
+	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
+	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 src/CMakeFiles/common_net_lib.dir/rule:
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/common_net_lib.dir/rule
+	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/common_net_lib.dir/rule
 .PHONY : src/CMakeFiles/common_net_lib.dir/rule
 
 # Convenience name for target.
@@ -133,35 +133,35 @@ common_net_lib: src/CMakeFiles/common_net_lib.dir/rule
 
 # fast build rule for target.
 common_net_lib/fast:
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/build
+	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/build
 .PHONY : common_net_lib/fast
 
-network_handle.o: network_handle.cc.o
+libevent_handle.o: libevent_handle.cc.o
 
-.PHONY : network_handle.o
+.PHONY : libevent_handle.o
 
 # target to build an object file
-network_handle.cc.o:
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/network_handle.cc.o
-.PHONY : network_handle.cc.o
+libevent_handle.cc.o:
+	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/libevent_handle.cc.o
+.PHONY : libevent_handle.cc.o
 
-network_handle.i: network_handle.cc.i
+libevent_handle.i: libevent_handle.cc.i
 
-.PHONY : network_handle.i
+.PHONY : libevent_handle.i
 
 # target to preprocess a source file
-network_handle.cc.i:
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/network_handle.cc.i
-.PHONY : network_handle.cc.i
+libevent_handle.cc.i:
+	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/libevent_handle.cc.i
+.PHONY : libevent_handle.cc.i
 
-network_handle.s: network_handle.cc.s
+libevent_handle.s: libevent_handle.cc.s
 
-.PHONY : network_handle.s
+.PHONY : libevent_handle.s
 
 # target to generate assembly for a file
-network_handle.cc.s:
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/network_handle.cc.s
-.PHONY : network_handle.cc.s
+libevent_handle.cc.s:
+	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/libevent_handle.cc.s
+.PHONY : libevent_handle.cc.s
 
 # Help Target
 help:
@@ -173,9 +173,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... test"
 	@echo "... common_net_lib"
-	@echo "... network_handle.o"
-	@echo "... network_handle.i"
-	@echo "... network_handle.s"
+	@echo "... libevent_handle.o"
+	@echo "... libevent_handle.i"
+	@echo "... libevent_handle.s"
 .PHONY : help
 
 
@@ -187,6 +187,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/dev/gitLocal/multi-master-tool/common_net_lib && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

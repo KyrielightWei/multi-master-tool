@@ -10,7 +10,7 @@ enable_testing()
 # test functions
 function(compile_and_test exec_file code_file arg result) 
     add_executable(${exec_file} ${code_file})
-   # target_link_libraries(${exec_file} common_net_lib)
+    
     add_test(NAME test_target_${exec_file} COMMAND ${exec_file} ${arg})
     set_tests_properties(test_target_${exec_file} PROPERTIES PASS_REGULAR_EXPRESSION ${result})
 endfunction(compile_and_test)
@@ -25,5 +25,7 @@ foreach(f ${TEST_SUFFIX_FILE})
     #MESSAGE(STATUS "TOP DIR = ${PROJECT_SOURCE_DIR}")
     compile_and_test(${exec_name} ${f} "" "TEST SUCCESS")  
     #target_link_libraries(${exec_name} common_net_lib)
+   # target_link_libraries(${exec_name} event)
+    target_link_libraries(${exec_name} common_net_lib)
 endforeach(f)
 

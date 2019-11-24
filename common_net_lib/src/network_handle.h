@@ -2,6 +2,10 @@
  * Common Network transmission handle
  * Basic Class
 */
+#ifndef NETWORK_HANDLE_HEADER
+
+#define NETWORK_HANDLE_HEADER
+
 #include<string>
 #include <iostream>
 
@@ -21,59 +25,54 @@
 class Packet
 {
     public:
-
     virtual unsigned int get_packet_size()=0;
-    virtual std::string get_packet_type(){return "Packet";};
 
     virtual void * get_val_ptr()=0;
 };
 
 
 /* simple type packet*/
-// template<typename T>
-// class SimplePacket:public Packet
-// {
-//   //  class_name = "SimplePacket";
+template<typename T>
+class SimplePacket:public Packet
+{
+  //  class_name = "SimplePacket";
     
-//     public:
+    public:
     
-//     void * get_val_ptr() override;
-//     unsigned int get_packet_size() override;
-//     void set_val(const T & val);
+    void * get_val_ptr() override;
+    unsigned int get_packet_size() override;
+    void set_val(const T & val);
 
-//     std::string get_packet_type(){return "SimplePacket";};
+    SimplePacket(const T & val)
+    {
+        value = val;
+    }
 
-//     SimplePacket(const T & val)
-//     {
-//         value = val;
-//     }
-
-//     private:
-//     T value;
-// };
+    private:
+    T value;
+};
 
 
 class NetworkHandle
 {
     public:
-    virtual void init_handle()=0;
+    virtual bool init_handle()=0;
     //init_clientHandle
-    virtual void free_handle()=0;
+    virtual bool free_handle()=0;
    
     /*connect*///client端任务，server端只用监听是否有连接到来就行
     //virtual bool ready_connect()=0;
-    virtual bool try_connect(const char* ip,const unsigned int port)=0;
-    virtual bool init_listener()=0;
+    // virtual bool try_connect(const char* ip,const unsigned int port)=0;
+    // virtual bool listen_connect()=0;
 
     /*Remote IO*/
     //virtual bool sendPacket(const Packet * send_packet)=0;
     //virtual bool receivePacket(Packet * rec_packet)=0;
-     virtual void send(const char* str)=0;
-     virtual unsigned char * recive()=0;
-    virtual void start()=0;
+    virtual bool send(const char * ip,const int port,const char * send_bytes,int send_size)=0;
+    virtual bool wait_recive(const char * ip,const int port,char * recive_bytes,int recive_size)=0;
+    //virtual bool set_recive_callback()=0;
+    //virtual bool send_wait_reply(const char * ip,const int port,const char * send_packet,char * recive_packet)=0;
     /*serialization*/  //basic
-
-    virtual std::string get_handle_type(){return "NetworkHandle";};
 };
 
 
@@ -81,20 +80,22 @@ class NetworkHandle
  *      Class SimplePacket<T> implementation
  * ***********************************************************
 */
-// template<typename T>
-// void * SimplePacket<T>::get_val_ptr()
-// {
-//     return (void *)&value;
-// }
+template<typename T>
+void * SimplePacket<T>::get_val_ptr()
+{
+    return (void *)&value;
+}
 
-// template<typename T>
-// void SimplePacket<T>::set_val(const T & val)
-// {
-//     value = val;
-// }
+template<typename T>
+void SimplePacket<T>::set_val(const T & val)
+{
+    value = val;
+}
 
-// template<typename T>
-// unsigned int SimplePacket<T>::get_packet_size()
-// {
-//     return sizeof(T);
-// }
+template<typename T>
+unsigned int SimplePacket<T>::get_packet_size()
+{
+    return sizeof(T);
+}
+
+#endif // !NETWORK_HANDLE_HEADER
