@@ -32,7 +32,7 @@
 #include <atomic>
 #include <condition_variable>
 
-#define LIBEVENT_HANDLE_DEBUG 1
+#define LIBEVENT_HANDLE_DEBUG 0
 
 
  /** callback function  **/
@@ -79,7 +79,11 @@ class LibeventHandle:public NetworkHandle
     bool wait_recive(const int id,char * recive_bytes,int * recive_size=0);
 
     int get_recive_buffer_length(const int id);
-    void set_event_callback(NetworkHandle_CB cb){};
+    void set_event_callback(NetworkHandle_CB cb,void * arg)
+    {
+        callback_funtion = cb;
+        callback_args = arg;
+    }
 
     int get_listen_connection_count();
     void get_listen_connection_array(int * array);
@@ -157,6 +161,7 @@ class LibeventHandle:public NetworkHandle
     std::vector<int> listen_id_vector;
 
     NetworkHandle_CB callback_funtion;
+    void * callback_args;
 
     std::thread * event_base_thread;
 

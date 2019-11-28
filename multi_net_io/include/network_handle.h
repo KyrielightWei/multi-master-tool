@@ -65,9 +65,9 @@ class NetworkHandle
     virtual int get_listen_connection_count()=0;
     virtual void get_listen_connection_array(int * array)=0;
 
-    virtual void set_event_callback(NetworkHandle_CB cb)=0;
+    virtual void set_event_callback(NetworkHandle_CB cb,void * arg)=0;
 
-    const EventType RECIVE = 1;
+    static const EventType EVENT_RECIVE = 1;
 };
 
 

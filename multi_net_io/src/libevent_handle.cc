@@ -161,7 +161,7 @@ int LibeventHandle::add_bufferevent_listen(const char* ip,const int port,int soc
     rw_w_unlock(bev_map_rw_lock_singal);
 
     set_connection_cb(peer_id);
-std::cout << "STOP" << std::endl;
+//std::cout << "STOP" << std::endl;
     rw_w_lock(listen_vector_rw_lock_singal);
     listen_id_vector.push_back(peer_id);
     rw_w_unlock(listen_vector_rw_lock_singal);
@@ -569,9 +569,6 @@ void default_bufferevent_read_cb(struct bufferevent *bev, void *ctx)
 
     LibeventHandle * lib = (LibeventHandle * )ctx;
 
-    // #if LIBEVENT_HANDLE_DEBUG
-    //     std::cout << "r lock = " << lib <<std::endl;
-    // #endif 
     int id = lib->get_connection_id(bev);
     
     #if LIBEVENT_HANDLE_DEBUG
@@ -584,20 +581,7 @@ void default_bufferevent_read_cb(struct bufferevent *bev, void *ctx)
     std::lock_guard<std::mutex> lk(*(lib->bev_map[id].mut_ptr));
     (lib->bev_map[id].recive_cond_ptr)->notify_all();
 
-    
-    // char buf_read[500];
-    // while(evbuffer_get_length(buf) > 0)
-    // {
-    //      lib->readBufferOnce(lib->bev_map[id],buf_read);
-    
-    // #if LIBEVENT_HANDLE_DEBUG
-    //     std::cout << "recive message is  "<< buf_read << std::endl;
-    //     std::cout <<  "evbuffer  2 length : "<< evbuffer_get_length(buf)  <<std::endl;
-    // #endif // DEBUG 
-    // //bufferevent_write(bev,"accept",7);
-
-    // }
-   
+    lib->callback_funtion(LibeventHandle::EVENT_RECIVE,lib->callback_args);
 }
 
 void default_bufferevent_write_cb(struct bufferevent *bev, void *ctx)
