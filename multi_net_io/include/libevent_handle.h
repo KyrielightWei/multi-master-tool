@@ -5,6 +5,7 @@
 
 #include "network_handle.h"
 #include <map>
+#include <vector>
 
 #include <string.h>
 #include <errno.h>
@@ -34,6 +35,7 @@
 #define LIBEVENT_HANDLE_DEBUG 1
 
 
+ /** callback function  **/
 void connlistener_cb(struct evconnlistener * listener, evutil_socket_t fd, struct sockaddr * sock, int socklen, void * arg);
 void listen_error_cb(struct evconnlistener *, void *);
 
@@ -41,35 +43,61 @@ void default_bufferevent_read_cb(struct bufferevent *bev, void *ctx);
 void default_bufferevent_write_cb(struct bufferevent *bev, void *ctx);
 
 
+/*bufferevent  and connection information*/
 struct BevInfor
 {
     std::string ip;
     int port;
     struct bufferevent * bev;
     bool is_listen;
+    std::atomic<int> * read_singal_ptr;
+    std::atomic<int> * write_singal_ptr;
+    std::condition_variable * recive_cond_ptr;
+    std::mutex * mut_ptr;
 };
 
-// void fun();
+/* Packet information */
+struct BufferControlBlock
+{
+    int size;    
+};
+
 class LibeventHandle:public NetworkHandle
 {
     public:
 
-
     bool init_handle(int port);
+    
     virtual bool init_handle()
     {
-        init_handle(9999);
+        return false;
     }
+
     virtual bool free_handle();  
    
-    virtual bool send(const char * ip,const int port,const char * send_bytes,int send_size);
-    virtual bool wait_recive(const char * ip,const int port,char * recive_bytes,int recive_size);
+    bool send(const int id,const char * send_bytes,const int send_size);
+    bool wait_recive(const int id,char * recive_bytes,int * recive_size=0);
 
-    int get_connection_id(const char * ip,const int port);
+    int get_recive_buffer_length(const int id);
+    void set_event_callback(NetworkHandle_CB cb){};
 
+    int get_listen_connection_count();
+    void get_listen_connection_array(int * array);
+
+
+    int get_connection_id()
+    {
+        return -1;
+    }
+
+    int get_connection_id(const char * ip,const int port,bool tryConnect);
+    
     void get_connection_ip(const int id,char * ip);
 
     int get_connection_port(const int id);
+
+
+   
 
     int get_connection_count()
     {
@@ -82,45 +110,60 @@ class LibeventHandle:public NetworkHandle
             free_handle();
     }
 
-    bool has_freed()
+    bool is_free()
     {
         return isFree;
     }
-
-    int try_connect(const char* ip,const int port);
     
-    void start_event_base_loop();
+    bool is_init()
+    {
+        return !isFree;
+    }
 
-    /** thread task **/
-    static void event_loop_run(LibeventHandle * lib);
-    
     private:
     bool init_listener();
     bool init_bufferevent();
     
-    int check_connect(const char* ip,const int port);
+    int try_connect(const char* ip,const int port);
+    
+    void start_event_base_loop();
+
+    void set_connection_cb(int id,
+    bufferevent_data_cb readcb = default_bufferevent_read_cb , bufferevent_data_cb writecb = default_bufferevent_write_cb,
+    bufferevent_event_cb eventcb = NULL , void *cbarg = NULL);
 
     int add_bufferevent_connect(const char* ip,const int port);
     int add_bufferevent_listen(const char* ip,const int port,int socket_fd);
     int remove_buffevent(int id);
+    
+    int get_connection_id(struct bufferevent * bev);
 
+    bool readBufferOnce(struct BevInfor &,char * data,int * data_size = 0);
+    bool writeBufferOnce(struct BevInfor &,const char * data,const int data_size);
 
     struct event_base *main_base;
     struct evconnlistener *conn_listener;
     
-    bool isFree;
+    std::atomic<bool> isFree;   //atomic
 
-    int local_port;
+    int local_port;  // only modify in  inithandle()
 
-    int max_bev_id;
+    std::atomic<int> max_bev_id;  //atomic var
+
+    std::atomic<int> bev_map_rw_lock_singal;  // read/write singal
     std::map<int,BevInfor> bev_map;
 
-    ///std::map<int,BevInfor> 
+    std::atomic<int> listen_vector_rw_lock_singal;
+    std::vector<int> listen_id_vector;
+
+    NetworkHandle_CB callback_funtion;
 
     std::thread * event_base_thread;
 
 
     /****************  friend function  **********************/
+    friend void event_loop_run(LibeventHandle * lib);
+    
     friend void connlistener_cb(struct evconnlistener * listener, evutil_socket_t fd, struct sockaddr * sock, int socklen, void * arg);
     
     friend void default_bufferevent_read_cb(struct bufferevent *bev, void *ctx);
@@ -128,5 +171,14 @@ class LibeventHandle:public NetworkHandle
 
 };
 
+
+ /** thread task **/
+void event_loop_run(LibeventHandle * lib);
+
+/** rw lock **/
+void rw_r_lock(std::atomic<int> & signal_int);
+void rw_w_lock(std::atomic<int> & signal_int);
+void rw_r_unlock(std::atomic<int> & signal_int);
+void rw_w_unlock(std::atomic<int> & signal_int);
 
 #endif // !LIBEVENT_HANDLE_HEADER

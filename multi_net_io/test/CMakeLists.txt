@@ -26,6 +26,6 @@ foreach(f ${TEST_SUFFIX_FILE})
     compile_and_test(${exec_name} ${f} "" "TEST SUCCESS")  
     #target_link_libraries(${exec_name} common_net_lib)
    # target_link_libraries(${exec_name} event)
-    target_link_libraries(${exec_name} common_net_lib)
+    target_link_libraries(${exec_name} multi_net_io)
 endforeach(f)
 

@@ -48,10 +48,10 @@ RM = /home/weixiaoxian/percona/percona_env/cmake/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/weixiaoxian/percona/multi-master-tool/common_net_lib
+CMAKE_SOURCE_DIR = /home/weixiaoxian/percona/multi-master-tool/multi_net_io
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/weixiaoxian/percona/multi-master-tool/common_net_lib
+CMAKE_BINARY_DIR = /home/weixiaoxian/percona/multi-master-tool/multi_net_io
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -91,14 +91,14 @@ test/fast: test
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(CMAKE_COMMAND) -E cmake_progress_start /home/weixiaoxian/percona/multi-master-tool/common_net_lib/CMakeFiles /home/weixiaoxian/percona/multi-master-tool/common_net_lib/src/CMakeFiles/progress.marks
-	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/weixiaoxian/percona/multi-master-tool/common_net_lib/CMakeFiles 0
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(CMAKE_COMMAND) -E cmake_progress_start /home/weixiaoxian/percona/multi-master-tool/multi_net_io/CMakeFiles /home/weixiaoxian/percona/multi-master-tool/multi_net_io/src/CMakeFiles/progress.marks
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f CMakeFiles/Makefile2 src/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/weixiaoxian/percona/multi-master-tool/multi_net_io/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/clean
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f CMakeFiles/Makefile2 src/clean
 .PHONY : clean
 
 # The main clean target
@@ -108,33 +108,33 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
-src/CMakeFiles/common_net_lib.dir/rule:
-	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/common_net_lib.dir/rule
-.PHONY : src/CMakeFiles/common_net_lib.dir/rule
+src/CMakeFiles/multi_net_io.dir/rule:
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/multi_net_io.dir/rule
+.PHONY : src/CMakeFiles/multi_net_io.dir/rule
 
 # Convenience name for target.
-common_net_lib: src/CMakeFiles/common_net_lib.dir/rule
+multi_net_io: src/CMakeFiles/multi_net_io.dir/rule
 
-.PHONY : common_net_lib
+.PHONY : multi_net_io
 
 # fast build rule for target.
-common_net_lib/fast:
-	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/build
-.PHONY : common_net_lib/fast
+multi_net_io/fast:
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/build
+.PHONY : multi_net_io/fast
 
 libevent_handle.o: libevent_handle.cc.o
 
@@ -142,7 +142,7 @@ libevent_handle.o: libevent_handle.cc.o
 
 # target to build an object file
 libevent_handle.cc.o:
-	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/libevent_handle.cc.o
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/libevent_handle.cc.o
 .PHONY : libevent_handle.cc.o
 
 libevent_handle.i: libevent_handle.cc.i
@@ -151,7 +151,7 @@ libevent_handle.i: libevent_handle.cc.i
 
 # target to preprocess a source file
 libevent_handle.cc.i:
-	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/libevent_handle.cc.i
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/libevent_handle.cc.i
 .PHONY : libevent_handle.cc.i
 
 libevent_handle.s: libevent_handle.cc.s
@@ -160,7 +160,7 @@ libevent_handle.s: libevent_handle.cc.s
 
 # target to generate assembly for a file
 libevent_handle.cc.s:
-	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/libevent_handle.cc.s
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/libevent_handle.cc.s
 .PHONY : libevent_handle.cc.s
 
 # Help Target
@@ -172,7 +172,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... test"
-	@echo "... common_net_lib"
+	@echo "... multi_net_io"
 	@echo "... libevent_handle.o"
 	@echo "... libevent_handle.i"
 	@echo "... libevent_handle.s"
@@ -187,6 +187,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/weixiaoxian/percona/multi-master-tool/common_net_lib && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

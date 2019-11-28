@@ -9,19 +9,6 @@
 #include<string>
 #include <iostream>
 
-// int testINT();
-
-/**
- * ToDo
- * NetWork基类需要的接口
- * 序列化类接口
-*/
-
-/**
- * Note
- * 继续使用构造函数与析构函数，虽然会提高代码的复杂性，但提供了使用用户指定方式分配空间的可能
- * 为了简化代码，构造函数与析构函数处理尽可能少的工作，初始化与销毁工作交给init与free函数处理
-*/
 class Packet
 {
     public:
@@ -53,26 +40,34 @@ class SimplePacket:public Packet
 };
 
 
+typedef int EventType;
+typedef void (*NetworkHandle_CB)(EventType event, void * arg);
+
 class NetworkHandle
 {
     public:
     virtual bool init_handle()=0;
     //init_clientHandle
     virtual bool free_handle()=0;
-   
-    /*connect*///client端任务，server端只用监听是否有连接到来就行
-    //virtual bool ready_connect()=0;
-    // virtual bool try_connect(const char* ip,const unsigned int port)=0;
-    // virtual bool listen_connect()=0;
 
-    /*Remote IO*/
-    //virtual bool sendPacket(const Packet * send_packet)=0;
-    //virtual bool receivePacket(Packet * rec_packet)=0;
-    virtual bool send(const char * ip,const int port,const char * send_bytes,int send_size)=0;
-    virtual bool wait_recive(const char * ip,const int port,char * recive_bytes,int recive_size)=0;
-    //virtual bool set_recive_callback()=0;
-    //virtual bool send_wait_reply(const char * ip,const int port,const char * send_packet,char * recive_packet)=0;
-    /*serialization*/  //basic
+    virtual bool is_free()=0;
+    virtual bool is_init()=0;
+   
+    virtual int get_connection_id()=0;
+    virtual int get_connection_count()=0;
+
+    virtual bool send(const int id,const char * send_bytes,const int send_size)=0;
+    
+    virtual bool wait_recive(const int id,char * recive_bytes,int * recive_size)=0;
+    
+    virtual int get_recive_buffer_length(const int id)=0;
+    
+    virtual int get_listen_connection_count()=0;
+    virtual void get_listen_connection_array(int * array)=0;
+
+    virtual void set_event_callback(NetworkHandle_CB cb)=0;
+
+    const EventType RECIVE = 1;
 };
 
 

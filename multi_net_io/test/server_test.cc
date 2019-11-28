@@ -37,14 +37,19 @@ int main(int argc,char * argv[])
         cout << "init error" << std::endl;
     }
 
-    
     //LibeventHandle::event_loop_run(&lib);
     //int last_count = 
+    int listen_array[100];
+    char temp_buf[50];
     while(1)
     {
+        memset(temp_buf,0,sizeof(char)*50);
         sleep(10);
-        cout <<  "connection_count return :"<< lib.get_connection_count() << std::endl;
-        cout <<  "error :"<< errno << std::endl;
+        cout << "listen count " << lib.get_listen_connection_count() << std::endl;
+        lib.get_listen_connection_array(listen_array);
+        lib.wait_recive(listen_array[0],temp_buf);
+        cout << "recive buffer length " << lib.get_recive_buffer_length(listen_array[0])<< std::endl;
+        cout << temp_buf << std::endl;
     };
     return 0;
 }

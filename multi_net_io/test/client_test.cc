@@ -33,9 +33,17 @@ int main(int argc,char * argv[])
     }
     if(port2 != 0)
     {
-        cout << "try connect ---- " << std::endl;
-        int re = lib.try_connect("127.0.0.1",port2);
-        cout <<  "try_connect return :"<< re << std::endl;
+        cout << "send ---- " << std::endl;
+        int id = lib.get_connection_id("127.0.0.1",port2,true);
+        cout <<  "connection id  :"<< id << std::endl;
+        int re = lib.send(id,"hdsbjadhkajlshsadasdasfdsajkdhjkashdjkashdjkahskjdhaskjhdkjashdjkhaskjdhakjshdkjashkdhsakjhdkjashjkdhjakshdkjashjkdhjasdasfvdzvzcvzxczxczxdkjashdkashdkjhaskjdhajo",163);
+        cout <<  "send return :"<< re << std::endl;
+
+        lib.send(id,"HELLO",6);
+
+        lib.send(id,"APPLE",6);
+
+        lib.send(id,"WORLD",6);
          
     }
     
@@ -43,9 +51,9 @@ int main(int argc,char * argv[])
     //int last_count = 
     while(1)
     {
-        sleep(10);
-        cout <<  "connection_count return :"<< lib.get_connection_count() << std::endl;
-              cout <<  "error :"<< errno << std::endl;
+        // sleep(10);
+        // cout <<  "connection_count return :"<< lib.get_connection_count() << std::endl;
+        //       cout <<  "error :"<< errno << std::endl;
     };
-    return 0;
+    // return 0;
 }

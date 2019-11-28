@@ -48,10 +48,10 @@ RM = /home/weixiaoxian/percona/percona_env/cmake/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/weixiaoxian/percona/multi-master-tool/common_net_lib
+CMAKE_SOURCE_DIR = /home/weixiaoxian/percona/multi-master-tool/multi_net_io
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/weixiaoxian/percona/multi-master-tool/common_net_lib
+CMAKE_BINARY_DIR = /home/weixiaoxian/percona/multi-master-tool/multi_net_io
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -91,9 +91,9 @@ test/fast: test
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/weixiaoxian/percona/multi-master-tool/common_net_lib/CMakeFiles /home/weixiaoxian/percona/multi-master-tool/common_net_lib/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/weixiaoxian/percona/multi-master-tool/multi_net_io/CMakeFiles /home/weixiaoxian/percona/multi-master-tool/multi_net_io/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/weixiaoxian/percona/multi-master-tool/common_net_lib/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/weixiaoxian/percona/multi-master-tool/multi_net_io/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -161,30 +161,17 @@ event_extra/fast:
 .PHONY : event_extra/fast
 
 #=============================================================================
-# Target rules for targets named common_net_lib
+# Target rules for targets named multi_net_io
 
 # Build rule for target.
-common_net_lib: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 common_net_lib
-.PHONY : common_net_lib
+multi_net_io: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 multi_net_io
+.PHONY : multi_net_io
 
 # fast build rule for target.
-common_net_lib/fast:
-	$(MAKE) -f src/CMakeFiles/common_net_lib.dir/build.make src/CMakeFiles/common_net_lib.dir/build
-.PHONY : common_net_lib/fast
-
-#=============================================================================
-# Target rules for targets named json_test_target
-
-# Build rule for target.
-json_test_target: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 json_test_target
-.PHONY : json_test_target
-
-# fast build rule for target.
-json_test_target/fast:
-	$(MAKE) -f test/CMakeFiles/json_test_target.dir/build.make test/CMakeFiles/json_test_target.dir/build
-.PHONY : json_test_target/fast
+multi_net_io/fast:
+	$(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/build
+.PHONY : multi_net_io/fast
 
 #=============================================================================
 # Target rules for targets named libevent_test_target
@@ -200,17 +187,30 @@ libevent_test_target/fast:
 .PHONY : libevent_test_target/fast
 
 #=============================================================================
-# Target rules for targets named packet_test_target
+# Target rules for targets named json_test_target
 
 # Build rule for target.
-packet_test_target: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 packet_test_target
-.PHONY : packet_test_target
+json_test_target: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 json_test_target
+.PHONY : json_test_target
 
 # fast build rule for target.
-packet_test_target/fast:
-	$(MAKE) -f test/CMakeFiles/packet_test_target.dir/build.make test/CMakeFiles/packet_test_target.dir/build
-.PHONY : packet_test_target/fast
+json_test_target/fast:
+	$(MAKE) -f test/CMakeFiles/json_test_target.dir/build.make test/CMakeFiles/json_test_target.dir/build
+.PHONY : json_test_target/fast
+
+#=============================================================================
+# Target rules for targets named client_test_target
+
+# Build rule for target.
+client_test_target: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 client_test_target
+.PHONY : client_test_target
+
+# fast build rule for target.
+client_test_target/fast:
+	$(MAKE) -f test/CMakeFiles/client_test_target.dir/build.make test/CMakeFiles/client_test_target.dir/build
+.PHONY : client_test_target/fast
 
 #=============================================================================
 # Target rules for targets named server_test_target
@@ -237,10 +237,10 @@ help:
 	@echo "... event_core"
 	@echo "... event"
 	@echo "... event_extra"
-	@echo "... common_net_lib"
-	@echo "... json_test_target"
+	@echo "... multi_net_io"
 	@echo "... libevent_test_target"
-	@echo "... packet_test_target"
+	@echo "... json_test_target"
+	@echo "... client_test_target"
 	@echo "... server_test_target"
 .PHONY : help
 
