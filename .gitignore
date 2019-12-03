@@ -1,7 +1,7 @@
 
 #ignore cmake build files
 CMakeFiles/
-*.cmake
+#*.cmake
 CMakeCache.txt
 Testing
 
