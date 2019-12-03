@@ -9,37 +9,6 @@
 #include<string>
 #include <iostream>
 
-class Packet
-{
-    public:
-    virtual unsigned int get_packet_size()=0;
-
-    virtual void * get_val_ptr()=0;
-};
-
-
-/* simple type packet*/
-template<typename T>
-class SimplePacket:public Packet
-{
-  //  class_name = "SimplePacket";
-    
-    public:
-    
-    void * get_val_ptr() override;
-    unsigned int get_packet_size() override;
-    void set_val(const T & val);
-
-    SimplePacket(const T & val)
-    {
-        value = val;
-    }
-
-    private:
-    T value;
-};
-
-
 typedef int EventType;
 typedef void (*NetworkHandle_CB)(EventType event, void * arg);
 
@@ -70,27 +39,5 @@ class NetworkHandle
     static const EventType EVENT_RECIVE = 1;
 };
 
-
-/*************************************************************
- *      Class SimplePacket<T> implementation
- * ***********************************************************
-*/
-template<typename T>
-void * SimplePacket<T>::get_val_ptr()
-{
-    return (void *)&value;
-}
-
-template<typename T>
-void SimplePacket<T>::set_val(const T & val)
-{
-    value = val;
-}
-
-template<typename T>
-unsigned int SimplePacket<T>::get_packet_size()
-{
-    return sizeof(T);
-}
 
 #endif // !NETWORK_HANDLE_HEADER

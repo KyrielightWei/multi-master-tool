@@ -456,9 +456,10 @@ bool LibeventHandle::writeBufferOnce(struct BevInfor & info,const char * data,co
   {
       rw_r_lock(bev_map_rw_lock_singal);
       const BevInfor & info = bev_map[id];
-      return info.port;
       rw_r_unlock(bev_map_rw_lock_singal);
+      return info.port;
   }
+      
 
 
 /****************  thread function  **********************/

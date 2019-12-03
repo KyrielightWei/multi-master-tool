@@ -136,6 +136,33 @@ multi_net_io/fast:
 	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/build
 .PHONY : multi_net_io/fast
 
+json_packet.o: json_packet.cc.o
+
+.PHONY : json_packet.o
+
+# target to build an object file
+json_packet.cc.o:
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/json_packet.cc.o
+.PHONY : json_packet.cc.o
+
+json_packet.i: json_packet.cc.i
+
+.PHONY : json_packet.i
+
+# target to preprocess a source file
+json_packet.cc.i:
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/json_packet.cc.i
+.PHONY : json_packet.cc.i
+
+json_packet.s: json_packet.cc.s
+
+.PHONY : json_packet.s
+
+# target to generate assembly for a file
+json_packet.cc.s:
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/json_packet.cc.s
+.PHONY : json_packet.cc.s
+
 libevent_handle.o: libevent_handle.cc.o
 
 .PHONY : libevent_handle.o
@@ -173,6 +200,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... test"
 	@echo "... multi_net_io"
+	@echo "... json_packet.o"
+	@echo "... json_packet.i"
+	@echo "... json_packet.s"
 	@echo "... libevent_handle.o"
 	@echo "... libevent_handle.i"
 	@echo "... libevent_handle.s"
