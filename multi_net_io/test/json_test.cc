@@ -8,6 +8,18 @@
 
 using namespace std;
 
+struct TestStruct
+{
+    char  space1[5];
+    const char * ptr1;
+   
+    const char * ptr2;
+    char  space2[5];
+     char i;
+     char ch;
+};
+
+
 void initTestBuffer(char * ch,int size,int val)
 {
     for(int i =0; i<size; i++)
@@ -71,12 +83,57 @@ int main(void)
 
     cout  << endl << "********** JSON Test END **********" << endl;
 
-    // unsigned u = 101058;
-    // string key = std::string((const char *)&u,sizeof(u));
-    // unsigned offset = *((unsigned *)key.c_str());
-    // cout << "u : " << u << endl;
-    // cout << "key : " << key << endl;
-    // cout << "offset : " << offset << endl;
+    cout  << endl << "********** Struct Parse Test **********" << endl;
+
+   // JsonPacket & json2 = json;
+
+  // json.clear_packet();
+    TestStruct testSTRUCT;
+    int testInt1 = 123456796;
+    int testInt2 = 45646887;
+    std::string testStr = "hello world   ";
+    std::string testStr1 = " xml ";
+    std::string testStr2 = " java ";
+
+    testSTRUCT.i = 'Z';
+    testSTRUCT.ch = 'P';
+    memset(testSTRUCT.space1,' ',5);
+    memset(testSTRUCT.space2,' ',5);
+    testSTRUCT.ptr1 = testStr2.c_str() + 3;
+    testSTRUCT.ptr2 = testStr.c_str() + 8;
+
+    cout << "testSTRUCT----------" << sizeof(char *) << endl;
+    for(int q = 0;q<sizeof(testSTRUCT);q++)
+    {
+        cout << " " <<*(((char *)&testSTRUCT)+q) <<" " ;
+    }
+    cout << endl;
+
+    json.clear_packet();
+
+    cout << "JSON STRUCT STRING : " << json.get_string_ptr() << endl;
+
+     json.printdy();
+
+
+    json.set_packet_header("MY STRUCT TEST",14);
+    json.set_packet_item("testInt1",testStr2.c_str(),6,JsonPacket::PacketItemType::FIRST);
+    json.set_packet_item("testStr",testStr.c_str(),14);
+    json.set_packet_item("testSTRUCT",(const char *)&testSTRUCT,sizeof(TestStruct),JsonPacket::PacketItemType::LAST);
+
+     json.set_note_for_ptr("testSTRUCT",9,(const char *)testSTRUCT.ptr2,sizeof(char),JsonPacket::PacketItemType::FIRST);
+    json.set_note_for_ptr("testSTRUCT",4, (const char *)testSTRUCT.ptr1 ,sizeof(char),JsonPacket::PacketItemType::LAST);
+
+   
+
+     cout << "JSON STRUCT STRING : " << json.get_string_ptr() << endl;
+
+
+    json.parse(json.get_string_ptr());
+
+    json.printdy();
+
+    cout  << endl << "********** Struct Parse Test **********" << endl;
 
     return 0;
 }

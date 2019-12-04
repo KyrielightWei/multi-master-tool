@@ -150,16 +150,19 @@ class JsonPacket
                 parse_stack.pop();
         }
 
-        DynamicBuffer objectBuffer;
+        void print_buffer()
+        {
+            objectBuffer.print_buffer();
+        }
         
         private:
        // bool start_parse_ptr_note;
         std::stack<ParseItem> parse_stack;
-        
+
         std::string ptr_key;
         int ptr_offset;
 
-
+        DynamicBuffer objectBuffer;
         
         std::vector<int> object_ptrs;
         std::map<std::string,int> name_id_map;

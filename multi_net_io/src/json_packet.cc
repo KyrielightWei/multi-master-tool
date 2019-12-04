@@ -36,6 +36,12 @@ void DynamicBuffer::destory()
 void DynamicBuffer::put(const char *data, int offset, int size)
 {
     check_space(offset, size, true);
+    bool append_byte = false;
+    if(offset + size > this->size())
+    {
+        append_byte = true;
+    }
+
     int index = offset / BLOCK_SIZE;
 
     offset = offset % BLOCK_SIZE;
@@ -53,7 +59,14 @@ void DynamicBuffer::put(const char *data, int offset, int size)
         else
         {
             memcpy((*block_it) + offset, data, size);
-            tail_offset_in_block = offset + size;
+        #if JSON_PACKET_DEBUG
+        cout << "----------------- before put tail: " << tail_offset_in_block << " " << offset << " " << size << endl;
+        #endif // 0
+            if(append_byte)
+                tail_offset_in_block = offset + size;
+        #if JSON_PACKET_DEBUG
+        cout << "----------------- after put tail: " << tail_offset_in_block<< " " << offset << " " << size << endl;
+        #endif // 0
             size = 0;
         }
     }
@@ -105,7 +118,14 @@ bool DynamicBuffer::get(char *data, int offset, int size)
 int DynamicBuffer::append(const char *data, int data_size)
 {
     int offset = size();
+    #if JSON_PACKET_DEBUG
+        cout << "************ before append_offset: " << " "<<offset << endl;
+    #endif // 0
     put(data, offset, data_size);
+
+    #if JSON_PACKET_DEBUG
+        cout << "************ after append_offset: "<< size() << endl;
+    #endif // 0
     return offset;
 }
 
@@ -196,6 +216,7 @@ void JsonPacket::clear_packet()
 {
     json_buffer.Clear();
     handle.clear();
+    json_writer.Reset(json_buffer);
 }
 
 void JsonPacket::set_packet_header(const char *h, int size)
@@ -261,10 +282,13 @@ void JsonPacket::set_note_for_ptr(const char *item_key, int offset, const char *
 
 void JsonPacket::printdy()
 {
-    handle.objectBuffer.print_buffer();
+    handle.print_buffer();
 }
 
-void JsonPacket::get_packet_header_ptr() {}
+void JsonPacket::get_packet_header_ptr() 
+{
+
+}
 
 void JsonPacket::get_packet_item_ptr() {}
 
@@ -334,7 +358,8 @@ bool JsonPacket::ReadHandler::String(const char *str, SizeType length, bool copy
         int index = name_id_map[item_key.key];
         int start_offset = object_ptrs[index];
         #if JSON_PACKET_DEBUG
-        cout << "start : " << start_offset << " ptr_offset : " <<(int)  item_offset.key[0] << ";"<< (int) item_offset.key[1]  << ";"<<(int) item_offset.key[2] << ";"<< std::endl;
+        cout << "--------- val_offset: "<<  val_offset << endl;
+        cout << "start : " << start_offset << " ptr_offset : " << ptr_offset << ";"<< std::endl;
         #endif // 0
         
         objectBuffer.put((const char *)&address,start_offset+ptr_offset,sizeof(address)); // modify address
