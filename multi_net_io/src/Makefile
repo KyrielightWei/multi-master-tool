@@ -136,32 +136,32 @@ multi_net_io/fast:
 	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/build
 .PHONY : multi_net_io/fast
 
-json_packet.o: json_packet.cc.o
+json_rpc_packet.o: json_rpc_packet.cc.o
 
-.PHONY : json_packet.o
+.PHONY : json_rpc_packet.o
 
 # target to build an object file
-json_packet.cc.o:
-	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/json_packet.cc.o
-.PHONY : json_packet.cc.o
+json_rpc_packet.cc.o:
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/json_rpc_packet.cc.o
+.PHONY : json_rpc_packet.cc.o
 
-json_packet.i: json_packet.cc.i
+json_rpc_packet.i: json_rpc_packet.cc.i
 
-.PHONY : json_packet.i
+.PHONY : json_rpc_packet.i
 
 # target to preprocess a source file
-json_packet.cc.i:
-	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/json_packet.cc.i
-.PHONY : json_packet.cc.i
+json_rpc_packet.cc.i:
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/json_rpc_packet.cc.i
+.PHONY : json_rpc_packet.cc.i
 
-json_packet.s: json_packet.cc.s
+json_rpc_packet.s: json_rpc_packet.cc.s
 
-.PHONY : json_packet.s
+.PHONY : json_rpc_packet.s
 
 # target to generate assembly for a file
-json_packet.cc.s:
-	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/json_packet.cc.s
-.PHONY : json_packet.cc.s
+json_rpc_packet.cc.s:
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/json_rpc_packet.cc.s
+.PHONY : json_rpc_packet.cc.s
 
 libevent_handle.o: libevent_handle.cc.o
 
@@ -190,6 +190,33 @@ libevent_handle.cc.s:
 	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/libevent_handle.cc.s
 .PHONY : libevent_handle.cc.s
 
+multi_buffer.o: multi_buffer.cc.o
+
+.PHONY : multi_buffer.o
+
+# target to build an object file
+multi_buffer.cc.o:
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/multi_buffer.cc.o
+.PHONY : multi_buffer.cc.o
+
+multi_buffer.i: multi_buffer.cc.i
+
+.PHONY : multi_buffer.i
+
+# target to preprocess a source file
+multi_buffer.cc.i:
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/multi_buffer.cc.i
+.PHONY : multi_buffer.cc.i
+
+multi_buffer.s: multi_buffer.cc.s
+
+.PHONY : multi_buffer.s
+
+# target to generate assembly for a file
+multi_buffer.cc.s:
+	cd /home/weixiaoxian/percona/multi-master-tool/multi_net_io && $(MAKE) -f src/CMakeFiles/multi_net_io.dir/build.make src/CMakeFiles/multi_net_io.dir/multi_buffer.cc.s
+.PHONY : multi_buffer.cc.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -200,12 +227,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... test"
 	@echo "... multi_net_io"
-	@echo "... json_packet.o"
-	@echo "... json_packet.i"
-	@echo "... json_packet.s"
+	@echo "... json_rpc_packet.o"
+	@echo "... json_rpc_packet.i"
+	@echo "... json_rpc_packet.s"
 	@echo "... libevent_handle.o"
 	@echo "... libevent_handle.i"
 	@echo "... libevent_handle.s"
+	@echo "... multi_buffer.o"
+	@echo "... multi_buffer.i"
+	@echo "... multi_buffer.s"
 .PHONY : help
 
 

@@ -1,53 +1,24 @@
-#ifndef JSON_PACKET_HEADER
-#define JSON_PACKET_HEADER
+#ifndef JSON_RPC_PACKET_HEADER
+#define JSON_RPC_PACKET_HEADER
 
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/reader.h"
+
+#include "multi_buffer.h"
 
 #include<iostream>
 #include<vector>
 #include<map>
 #include<stack>
 //#include "network_handle.h"
-#define JSON_PACKET_DEBUG 1
+#define JSON_PACKET_DEBUG 0
 
 /*
 1. string -> json -> args : get args by array index or key(string)  
 2. args -> json -> string : store the name and val of each arg , record some special annotation
 when convert json to args, handle these special annotation
 */
-
-
-class DynamicBuffer
-{
-    public:
-    const int BLOCK_SIZE = 1024;
-
-    DynamicBuffer();
-    ~DynamicBuffer();
-    void put(const char * data,int offset,int size);
-    bool get(char * data,int offset,int size);
-    int append(const char * data,int size);
-    char * get_address(int offset);
-
-    int size();
-    int capacity();
-
-    void destory();
-    void clear();
-
-    void print_buffer();
-
-    private:
-
-    bool check_space(int offset,int size,bool expand);
-    void add_blocks(int i);
-    
-    std::vector<char * > blocks_list;
-    int tail_offset_in_block;
-};
-
 
 using std::cout;
 using std::endl;
@@ -67,7 +38,7 @@ using rapidjson::SizeType;
  * so object_ptrs[0] is the address of header
 */
 
-class JsonPacket 
+class JsonRpcPacket 
 {
     public:
     enum PacketItemType
@@ -78,12 +49,13 @@ class JsonPacket
         SINGLE
     };
 
-    JsonPacket():json_writer(json_buffer)
+    JsonRpcPacket():json_writer(json_buffer)
     {
     }
 
     const char * get_string_ptr();
-    void parse(const char * json_str);
+    int get_string_length();
+    void parse(const char * json_str,char * buffer,int size);
 
     void clear_packet();
     
@@ -92,10 +64,12 @@ class JsonPacket
     void set_note_for_ptr(const char * item_key,int offset,const char * val,int size,PacketItemType type = PacketItemType::NORMAL);
 
    
-    void get_packet_header_ptr();
-    void get_packet_item_ptr();
-
-    void printdy();
+    char * get_packet_header_ptr();
+    int get_packet_header_size();
+    char * get_packet_item_ptr(int i);
+    int get_packet_item_size(int i);
+    char * get_packet_item_ptr(const char * key);
+    int get_packet_item_size(const char * key);
     
     private:
 
@@ -122,7 +96,7 @@ class JsonPacket
     };
     
     
-    class ReadHandler : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, ReadHandler> {
+    class BufferReadHandler : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, BufferReadHandler> {
         public:
         /* Debug point function */
         bool Null() { cout << "Null()" << endl; return true; }
@@ -150,11 +124,35 @@ class JsonPacket
                 parse_stack.pop();
         }
 
-        void print_buffer()
+        // void print_buffer()
+        // {
+        //     objectBuffer.print_buffer();
+        // }
+
+        // BufferReadHandler(char * buffer,int size) : objectBuffer(buffer,size)
+        // {
+        //     ptr_key = "";
+        //     ptr_offset = 0;
+        // }
+
+        void setBuffer(char * buffer,int size)
         {
-            objectBuffer.print_buffer();
+            objectBuffer.setBuffer(buffer,size);
         }
         
+        char * get_address(int offset)
+        {
+            return objectBuffer.get_address(offset);
+        }
+
+        void append_tail_offset()
+        {
+            object_ptrs.push_back(objectBuffer.size() );
+        }
+
+        std::vector<int> object_ptrs;
+        std::map<std::string,int> name_id_map;
+
         private:
        // bool start_parse_ptr_note;
         std::stack<ParseItem> parse_stack;
@@ -162,17 +160,13 @@ class JsonPacket
         std::string ptr_key;
         int ptr_offset;
 
-        DynamicBuffer objectBuffer;
-        
-        std::vector<int> object_ptrs;
-        std::map<std::string,int> name_id_map;
+        FixedBuffer objectBuffer;
     };
-
+    
     rapidjson::StringBuffer json_buffer;
     rapidjson::Writer<rapidjson::StringBuffer> json_writer;
     rapidjson::Reader json_reader;
-    ReadHandler handle; 
-    
+    BufferReadHandler handle; 
     
 };
 

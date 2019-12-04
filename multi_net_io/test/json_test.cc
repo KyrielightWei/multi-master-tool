@@ -4,7 +4,7 @@
  * **/
 
 #include<iostream>
-#include"json_packet.h"
+#include"json_rpc_packet.h"
 
 using namespace std;
 
@@ -66,20 +66,20 @@ int main(void)
 
     cout  << endl << "********** JSON Test **********" << endl;
 
-    JsonPacket json;
-    json.set_packet_header("from ip",7);
+    JsonRpcPacket json;
+    // json.set_packet_header("from ip",7);
 
-    json.set_packet_item("first","hello",5,JsonPacket::PacketItemType::FIRST);
-    json.set_packet_item("second","world",5);
-    json.set_packet_item("third",tb1,10,JsonPacket::PacketItemType::LAST);
+    // json.set_packet_item("first","hello",5,JsonPacket::PacketItemType::FIRST);
+    // json.set_packet_item("second","world",5);
+    // json.set_packet_item("third",tb1,10,JsonPacket::PacketItemType::LAST);
 
-    json.set_note_for_ptr("third",0,"575",3,JsonPacket::PacketItemType::FIRST);
-    json.set_note_for_ptr("second",23,"989",3,JsonPacket::PacketItemType::LAST);
-    cout << "JSON STRING : " << json.get_string_ptr() << endl;
+    // json.set_note_for_ptr("third",0,"575",3,JsonPacket::PacketItemType::FIRST);
+    // json.set_note_for_ptr("second",23,"989",3,JsonPacket::PacketItemType::LAST);
+    // cout << "JSON STRING : " << json.get_string_ptr() << endl
 
-    json.parse(json.get_string_ptr());
+  //  json.parse(json.get_string_ptr());
 
-    json.printdy();
+   // json.printdy();
 
     cout  << endl << "********** JSON Test END **********" << endl;
 
@@ -99,8 +99,8 @@ int main(void)
     testSTRUCT.ch = 'P';
     memset(testSTRUCT.space1,' ',5);
     memset(testSTRUCT.space2,' ',5);
-    testSTRUCT.ptr1 = testStr2.c_str() + 3;
-    testSTRUCT.ptr2 = testStr.c_str() + 8;
+    testSTRUCT.ptr1 = testStr1.c_str() + 3;
+    testSTRUCT.ptr2 = testStr2.c_str() + 4;
 
     cout << "testSTRUCT----------" << sizeof(char *) << endl;
     for(int q = 0;q<sizeof(testSTRUCT);q++)
@@ -111,29 +111,66 @@ int main(void)
 
     json.clear_packet();
 
-    cout << "JSON STRUCT STRING : " << json.get_string_ptr() << endl;
-
-     json.printdy();
-
-
+   // cout << "JSON STRUCT STRING : " << json.get_string_ptr() << endl;
+   
     json.set_packet_header("MY STRUCT TEST",14);
-    json.set_packet_item("testInt1",testStr2.c_str(),6,JsonPacket::PacketItemType::FIRST);
+    json.set_packet_item("testInt1",testStr2.c_str(),6,JsonRpcPacket::PacketItemType::FIRST);
     json.set_packet_item("testStr",testStr.c_str(),14);
-    json.set_packet_item("testSTRUCT",(const char *)&testSTRUCT,sizeof(TestStruct),JsonPacket::PacketItemType::LAST);
+    json.set_packet_item("testSTRUCT",(const char *)&testSTRUCT,sizeof(TestStruct),JsonRpcPacket::PacketItemType::LAST);
 
-     json.set_note_for_ptr("testSTRUCT",9,(const char *)testSTRUCT.ptr2,sizeof(char),JsonPacket::PacketItemType::FIRST);
-    json.set_note_for_ptr("testSTRUCT",4, (const char *)testSTRUCT.ptr1 ,sizeof(char),JsonPacket::PacketItemType::LAST);
+    json.set_note_for_ptr("testSTRUCT",16,(const char *)testSTRUCT.ptr2,sizeof(char),JsonRpcPacket::PacketItemType::FIRST);
+    json.set_note_for_ptr("testSTRUCT",8, (const char *)testSTRUCT.ptr1 ,sizeof(char),JsonRpcPacket::PacketItemType::LAST);
 
    
 
      cout << "JSON STRUCT STRING : " << json.get_string_ptr() << endl;
+    int  temp_size =  json.get_string_length();
+  //  cout << "temp_size ============== " << *(json.get_string_ptr() + 330)<< endl;
+    char * temp_space = new char[temp_size];
 
+    json.parse(json.get_string_ptr(),temp_space,temp_size);
 
-    json.parse(json.get_string_ptr());
+    print_buffer(temp_space,temp_size);
+    //json.printdy();
 
-    json.printdy();
+    cout  << endl << "********** Struct Parse Test END **********" << endl;
 
-    cout  << endl << "********** Struct Parse Test **********" << endl;
+     cout  << endl << "********** Struct GET Test **********" << endl;
 
+    cout  << "+++++ Packet Header +++++" << endl;
+    cout  << json.get_packet_header_size() << endl;
+    cout  << std::string(json.get_packet_header_ptr(),json.get_packet_header_size()) << endl;
+    cout  << "+++++ Packet Header END +++++" << endl;
+
+    cout << endl << "+++++ Packet ITEM INDEX +++++" << endl;
+    int index = 2;
+    cout  << json.get_packet_item_size(index) << endl;
+    cout  << std::string(json.get_packet_item_ptr(index),json.get_packet_item_size(index)) << endl;
+    cout  << "+++++ Packet ITEM INDEX END +++++" << endl;
+
+    cout << endl << "+++++ Packet KEY INDEX +++++" << endl;
+    std::string  key = "testStr";
+    cout  << json.get_packet_item_size(key.c_str()) << endl;
+    cout  << std::string(json.get_packet_item_ptr(key.c_str()),json.get_packet_item_size(key.c_str())) << endl;
+    cout  << "+++++ Packet KEY INDEX END +++++" << endl;
+
+    cout << endl << "+++++ Packet Struct INDEX +++++" << endl;
+    std::string  key2 = "testSTRUCT";
+    cout  << json.get_packet_item_size(key2.c_str()) << endl;
+    cout  << std::string(json.get_packet_item_ptr(key2.c_str()),json.get_packet_item_size(key2.c_str())) << endl;
+
+    struct TestStruct * test_ptr = ( struct TestStruct * )json.get_packet_item_ptr(key2.c_str());
+
+    cout << test_ptr << endl;
+     cout <<(int64_t) &test_ptr->ptr1 - (int64_t) test_ptr << endl;
+     cout <<(int64_t) &test_ptr->ptr2  - (int64_t) test_ptr << endl;
+     cout <<*test_ptr->ptr1 << endl;
+     cout <<*test_ptr->ptr2 << endl;
+     cout << test_ptr->ch << endl;
+     cout << test_ptr->i << endl;
+
+    cout  << "+++++ Packet Struct INDEX END +++++" << endl;
+
+     cout  << endl << "********** Struct GET Test END **********" << endl;
     return 0;
 }
