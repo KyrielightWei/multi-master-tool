@@ -11,7 +11,7 @@ const char *JsonRpcPacket::get_string_ptr()
 
 int JsonRpcPacket::get_string_length()
 {
-    return strlen(json_buffer.GetString()+1);
+    return strlen(json_buffer.GetString()+1)+2;
 }
 
 void JsonRpcPacket::parse(const char *json_str,char * buffer,int size)
