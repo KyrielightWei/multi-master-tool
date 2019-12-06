@@ -1,217 +1,49 @@
-#include "json_packet.h"
+#include "json_rpc_packet.h"
 
-/******************************************************
- * DynamicBuffer Defintion
-******************************************************/
-DynamicBuffer::DynamicBuffer()
-{
-    blocks_list.clear();
-    tail_offset_in_block = 0;
-}
-
-DynamicBuffer::~DynamicBuffer()
-{
-    destory();
-}
-
-void DynamicBuffer::clear()
-{
-    for (auto it = blocks_list.begin(); it != blocks_list.end(); it++)
-    {
-        memset(*it, 0, BLOCK_SIZE);
-    }
-    tail_offset_in_block = 0;
-}
-
-void DynamicBuffer::destory()
-{
-    for (auto it = blocks_list.begin(); it != blocks_list.end(); it++)
-    {
-        delete[](*it);
-    }
-    blocks_list.clear();
-    tail_offset_in_block = 0;
-}
-
-void DynamicBuffer::put(const char *data, int offset, int size)
-{
-    check_space(offset, size, true);
-    int index = offset / BLOCK_SIZE;
-
-    offset = offset % BLOCK_SIZE;
-    auto block_it = blocks_list.begin() + index;
-
-    while (size != 0)
-    {
-        if (size > BLOCK_SIZE - offset)
-        {
-            memcpy((*block_it) + offset, data, BLOCK_SIZE - offset);
-            size = size - (BLOCK_SIZE - offset);
-            offset = 0;
-            block_it++;
-        }
-        else
-        {
-            memcpy((*block_it) + offset, data, size);
-            tail_offset_in_block = offset + size;
-            size = 0;
-        }
-    }
-}
-
-char * DynamicBuffer::get_address(int offset)
-{
-    if(offset > size())
-    {
-        return NULL;
-    }
-
-    int index = offset / BLOCK_SIZE;
-    offset = offset % BLOCK_SIZE;
-    auto block_it = blocks_list.begin() + index;
-
-    return (*block_it) + offset;
-}
-
-bool DynamicBuffer::get(char *data, int offset, int size)
-{
-    if (!check_space(offset, size, false))
-    {
-        return false;
-    }
-    int index = offset / BLOCK_SIZE;
-    offset = offset % BLOCK_SIZE;
-    auto block_it = blocks_list.begin() + index;
-
-    while (size != 0)
-    {
-        if (size > BLOCK_SIZE - offset)
-        {
-            memcpy(data, (*block_it) + offset, BLOCK_SIZE - offset);
-            size = size - (BLOCK_SIZE - offset);
-            data = data + (BLOCK_SIZE - offset);
-            offset = 0;
-            block_it++;
-        }
-        else
-        {
-            memcpy(data, (*block_it) + offset, size);
-            size = 0;
-        }
-    }
-    return true;
-}
-
-int DynamicBuffer::append(const char *data, int data_size)
-{
-    int offset = size();
-    put(data, offset, data_size);
-    return offset;
-}
-
-bool DynamicBuffer::check_space(int offset, int size, bool expand)
-{
-    if (offset + size > capacity())
-    {
-        if (!expand)
-        {
-            return false;
-        }
-        else
-        {
-            int require = offset + size - capacity();
-            if (require % BLOCK_SIZE == 0)
-            {
-                require = require / BLOCK_SIZE;
-            }
-            else
-            {
-                require = require / BLOCK_SIZE + 1;
-            }
-            add_blocks(require);
-            return true;
-        }
-    }
-    else
-    {
-        return true;
-    }
-}
-
-void DynamicBuffer::add_blocks(int i)
-{
-    // cout << "add" << i << " blocks" << endl; 
-    for (int j = 0; j < i; j++)
-    {
-        blocks_list.push_back(new char[BLOCK_SIZE]{0});
-    }
-}
-
-int DynamicBuffer::size()
-{
-    int count = blocks_list.size();
-    if (count > 0)
-    {
-        count--;
-    }
-    return count * BLOCK_SIZE + tail_offset_in_block;
-}
-
-int DynamicBuffer::capacity()
-{
-    return blocks_list.size() * BLOCK_SIZE;
-}
-
-void DynamicBuffer::print_buffer()
-{
-    int i = 0;
-    for (auto it = blocks_list.begin(); it != blocks_list.end(); it++)
-    {
-        std::cout << "Block NO." << i << " : " << std::endl;
-        for (int j = 0; j < BLOCK_SIZE; j++)
-        {
-            std::cout << blocks_list[i][j];
-        }
-        i++;
-        std::cout << std::endl;
-    }
-    std::cout << "Dynamic Buffer Size : " << size() << std::endl;
-}
 
 /******************************************************
  * JsonPacket 
 ******************************************************/
-const char *JsonPacket::get_string_ptr()
+const char *JsonRpcPacket::get_string_ptr()
 {
     return json_buffer.GetString();
 }
 
-void JsonPacket::parse(const char *json_str)
+int JsonRpcPacket::get_string_length()
 {
+    return strlen(json_buffer.GetString()+1)+2;
+}
+
+void JsonRpcPacket::parse(const char *json_str,char * buffer,int size)
+{
+    //BufferReadHandler handle(buffer,size);
+    handle.setBuffer(buffer,size);
     rapidjson::StringStream ss(json_str);
     json_reader.Parse(ss, handle);
+    handle.append_tail_offset();
 }
 
-void JsonPacket::clear_packet()
+void JsonRpcPacket::clear_packet()
 {
     json_buffer.Clear();
-    handle.clear();
+    //handle.clear();
+    json_writer.Reset(json_buffer);
 }
 
-void JsonPacket::set_packet_header(const char *h, int size)
+void JsonRpcPacket::set_packet_header(const char *h, int size)
 {
     json_writer.StartArray();
     json_writer.StartObject();
 
     json_writer.Key("SegmentType");
     json_writer.Int(PacketSegmentType::HEADER);
-    json_writer.Key("Header");
+    json_writer.Key("PacketHeader");
     json_writer.String(h, size);
 
     json_writer.EndObject();
 }
 
-void JsonPacket::set_packet_item(const char *key, const char *val, int val_size, PacketItemType type)
+void JsonRpcPacket::set_packet_item(const char *key, const char *val, int val_size, PacketItemType type)
 {
     if (type == PacketItemType::FIRST || type == PacketItemType::SINGLE)
     {
@@ -229,7 +61,7 @@ void JsonPacket::set_packet_item(const char *key, const char *val, int val_size,
     }
 }
 
-void JsonPacket::set_note_for_ptr(const char *item_key, int offset, const char *val, int val_size, PacketItemType type)
+void JsonRpcPacket::set_note_for_ptr(const char *item_key, int offset, const char *val, int val_size, PacketItemType type)
 {
     if (type == PacketItemType::FIRST || type == PacketItemType::SINGLE)
     {
@@ -259,19 +91,46 @@ void JsonPacket::set_note_for_ptr(const char *item_key, int offset, const char *
     }
 }
 
-void JsonPacket::printdy()
+char * JsonRpcPacket::get_packet_header_ptr()
 {
-    handle.objectBuffer.print_buffer();
+    int index = handle.name_id_map["PacketHeader"];
+    int offset = handle.object_ptrs[index];
+    return handle.get_address(offset);
 }
 
-void JsonPacket::get_packet_header_ptr() {}
+int JsonRpcPacket::get_packet_header_size()
+{
+    int index = handle.name_id_map["PacketHeader"];
+    return handle.object_ptrs[index+1] - handle.object_ptrs[index];
+}
 
-void JsonPacket::get_packet_item_ptr() {}
+char * JsonRpcPacket::get_packet_item_ptr(int i)
+{
+    int offset = handle.object_ptrs[i];
+    return handle.get_address(offset);
+}
 
+int JsonRpcPacket::get_packet_item_size(int i)
+{
+    return handle.object_ptrs[i+1] - handle.object_ptrs[i];
+}
+
+char * JsonRpcPacket::get_packet_item_ptr(const char * key)
+{
+    int index = handle.name_id_map[key];
+    int offset = handle.object_ptrs[index];
+    return handle.get_address(offset);
+}
+
+int JsonRpcPacket::get_packet_item_size(const char * key)
+{
+  int index = handle.name_id_map[key];
+    return handle.object_ptrs[index+1] - handle.object_ptrs[index];
+}
 /******************************************************
  * JsonPacket :: ReadHandler
 ******************************************************/
-bool JsonPacket::ReadHandler::Uint(unsigned u)
+bool JsonRpcPacket::BufferReadHandler::Uint(unsigned u)
 {
     #if JSON_PACKET_DEBUG
         cout << "Uint(" << u << ")" << endl;// return true;
@@ -290,6 +149,10 @@ bool JsonPacket::ReadHandler::Uint(unsigned u)
         item_temp.type = ParseType::PTR_OFFSET;
         parse_stack.push(item_temp);
     }
+    else if(item.key == "SegmentType")
+    {
+        
+    }
     else
     {
         int offset = objectBuffer.append((const char *)&u,sizeof(u));
@@ -299,7 +162,7 @@ bool JsonPacket::ReadHandler::Uint(unsigned u)
     return true;
 }
 
-bool JsonPacket::ReadHandler::String(const char *str, SizeType length, bool copy)
+bool JsonRpcPacket::BufferReadHandler::String(const char *str, SizeType length, bool copy)
 {
     #if JSON_PACKET_DEBUG
        cout << "String(" << str << ", " << length << ", "  << copy << ")" << endl;
@@ -334,10 +197,19 @@ bool JsonPacket::ReadHandler::String(const char *str, SizeType length, bool copy
         int index = name_id_map[item_key.key];
         int start_offset = object_ptrs[index];
         #if JSON_PACKET_DEBUG
-        cout << "start : " << start_offset << " ptr_offset : " <<(int)  item_offset.key[0] << ";"<< (int) item_offset.key[1]  << ";"<<(int) item_offset.key[2] << ";"<< std::endl;
+        cout << "************* adderss_str  = " << (int)*address << " " << *address << endl;
+        cout << "************* adderss = " <<  (int64_t)address <<  endl;
+        cout << "************* adderss & = " << *((int64_t *)std::string((const char *)&address,sizeof(address)).c_str()) <<  endl;
+        cout << "--------- val_offset: "<<  val_offset << endl;
+        cout << "start : " << start_offset << " ptr_offset : " << ptr_offset << ";"<< std::endl;
         #endif // 0
         
         objectBuffer.put((const char *)&address,start_offset+ptr_offset,sizeof(address)); // modify address
+
+        #if JSON_PACKET_DEBUG
+        cout << "************* put adderss = " <<  *((int64_t*)objectBuffer.get_address(start_offset+ptr_offset)) <<  endl;
+        #endif // 0
+
         return true;
     }
 
@@ -347,7 +219,7 @@ bool JsonPacket::ReadHandler::String(const char *str, SizeType length, bool copy
     return true;
 }
 
-bool JsonPacket::ReadHandler::StartObject()
+bool JsonRpcPacket::BufferReadHandler::StartObject()
 {
      #if JSON_PACKET_DEBUG
        cout << "StartObject()" << endl;// return true;
@@ -360,7 +232,7 @@ bool JsonPacket::ReadHandler::StartObject()
     return true;
 }
 
-bool JsonPacket::ReadHandler::Key(const char *str, SizeType length, bool copy) 
+bool JsonRpcPacket::BufferReadHandler::Key(const char *str, SizeType length, bool copy) 
 {
     #if JSON_PACKET_DEBUG
        cout << "Key(" << str << ", " << length << ", "  << copy << ")" << endl;
@@ -373,7 +245,7 @@ bool JsonPacket::ReadHandler::Key(const char *str, SizeType length, bool copy)
     return true;
 }
 
-bool JsonPacket::ReadHandler::EndObject(SizeType memberCount) 
+bool JsonRpcPacket::BufferReadHandler::EndObject(SizeType memberCount) 
 {
     #if JSON_PACKET_DEBUG
       cout << "EndObject(" << memberCount << ")" << endl; //return true;
@@ -390,7 +262,7 @@ bool JsonPacket::ReadHandler::EndObject(SizeType memberCount)
     return true;
 }
 
-bool JsonPacket::ReadHandler::StartArray() 
+bool JsonRpcPacket::BufferReadHandler::StartArray() 
 {
     #if JSON_PACKET_DEBUG
      cout << "StartArray()" << endl; //return true;
@@ -410,7 +282,7 @@ bool JsonPacket::ReadHandler::StartArray()
     return true;
 }
 
-bool JsonPacket::ReadHandler::EndArray(SizeType elementCount) 
+bool JsonRpcPacket::BufferReadHandler::EndArray(SizeType elementCount) 
 {
      #if JSON_PACKET_DEBUG
       cout << "EndArray(" << elementCount << ")" << endl;// return true;
