@@ -21,16 +21,16 @@ class NetworkHandle
 
     virtual bool is_free()=0;
     virtual bool is_init()=0;
-   
+
     virtual int get_connection_id()=0;
     virtual int get_connection_count()=0;
 
     virtual bool send(const int id,const char * send_bytes,const int send_size)=0;
-    
-    virtual bool wait_recive(const int id,char * recive_bytes,int * recive_size)=0;
-    
+
+    virtual int wait_recive(const int id,char * recive_bytes,int * recive_size)=0;
+
     virtual int get_recive_buffer_length(const int id)=0;
-    
+
     virtual int get_listen_connection_count()=0;
     virtual void get_listen_connection_array(int * array)=0;
 

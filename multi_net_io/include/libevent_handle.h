@@ -59,7 +59,7 @@ struct BevInfor
 /* Packet information */
 struct BufferControlBlock
 {
-    int size;    
+    int size;
 };
 
 class LibeventHandle:public NetworkHandle
@@ -67,16 +67,16 @@ class LibeventHandle:public NetworkHandle
     public:
 
     bool init_handle(int port);
-    
+
     virtual bool init_handle()
     {
         return false;
     }
 
-    virtual bool free_handle();  
-   
+    virtual bool free_handle();
+
     bool send(const int id,const char * send_bytes,const int send_size);
-    bool wait_recive(const int id,char * recive_bytes,int * recive_size=0);
+    int wait_recive(const int id,char * recive_bytes,int * recive_size=0);
 
     int get_recive_buffer_length(const int id);
     void set_event_callback(NetworkHandle_CB cb,void * arg)
@@ -95,13 +95,13 @@ class LibeventHandle:public NetworkHandle
     }
 
     int get_connection_id(const char * ip,const int port,bool tryConnect);
-    
+
     void get_connection_ip(const int id,char * ip);
 
     int get_connection_port(const int id);
 
 
-   
+
 
     int get_connection_count()
     {
@@ -118,7 +118,7 @@ class LibeventHandle:public NetworkHandle
     {
         return isFree;
     }
-    
+
     bool is_init()
     {
         return !isFree;
@@ -127,9 +127,9 @@ class LibeventHandle:public NetworkHandle
     private:
     bool init_listener();
     bool init_bufferevent();
-    
+
     int try_connect(const char* ip,const int port);
-    
+
     void start_event_base_loop();
 
     void set_connection_cb(int id,
@@ -139,15 +139,15 @@ class LibeventHandle:public NetworkHandle
     int add_bufferevent_connect(const char* ip,const int port);
     int add_bufferevent_listen(const char* ip,const int port,int socket_fd);
     int remove_buffevent(int id);
-    
+
     int get_connection_id(struct bufferevent * bev);
 
-    bool readBufferOnce(struct BevInfor &,char * data,int * data_size = 0);
+    int readBufferOnce(struct BevInfor &,char * data,int * data_size = 0);
     bool writeBufferOnce(struct BevInfor &,const char * data,const int data_size);
 
     struct event_base *main_base;
     struct evconnlistener *conn_listener;
-    
+
     std::atomic<bool> isFree;   //atomic
 
     int local_port;  // only modify in  inithandle()
@@ -168,9 +168,9 @@ class LibeventHandle:public NetworkHandle
 
     /****************  friend function  **********************/
     friend void event_loop_run(LibeventHandle * lib);
-    
+
     friend void connlistener_cb(struct evconnlistener * listener, evutil_socket_t fd, struct sockaddr * sock, int socklen, void * arg);
-    
+
     friend void default_bufferevent_read_cb(struct bufferevent *bev, void *ctx);
     friend void default_bufferevent_write_cb(struct bufferevent *bev, void *ctx);
 
