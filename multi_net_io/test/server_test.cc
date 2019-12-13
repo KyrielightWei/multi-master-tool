@@ -43,7 +43,7 @@ int main(int argc,char * argv[])
     while(1)
     {
         memset(temp_buf,0,sizeof(char)*50);
-        sleep(10);
+        sleep(4);
         cout << "listen count " << lib.get_listen_connection_count() << std::endl;
         lib.get_listen_connection_array(listen_array);
         int readsize = lib.wait_recive(listen_array[0],temp_buf);
