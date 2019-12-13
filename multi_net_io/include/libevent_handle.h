@@ -110,7 +110,7 @@ class LibeventHandle:public NetworkHandle
 
     ~LibeventHandle()
     {
-        if(isFree = false)
+        if(isFree == false)
             free_handle();
     }
 

@@ -58,7 +58,7 @@ bool LibeventHandle::init_listener()
     sin.sin_addr.s_addr = htonl(0);
 
     conn_listener = evconnlistener_new_bind(main_base,&connlistener_cb,this,
-    LEV_OPT_CLOSE_ON_FREE  | LEV_OPT_THREADSAFE | LEV_OPT_REUSEABLE,
+    LEV_OPT_CLOSE_ON_FREE  | LEV_OPT_THREADSAFE | LEV_OPT_REUSEABLE ,
     -1,(struct sockaddr*)&sin,sizeof(sin));
 
     if(!conn_listener)
@@ -156,16 +156,17 @@ int LibeventHandle::add_bufferevent_listen(const char* ip,const int port,int soc
 
     int peer_id = max_bev_id.load();
     max_bev_id.fetch_add(1);
+  //  std::cout << "listen singal :" <<bev_map_rw_lock_singal.load()  <<port << std::endl;
     rw_w_lock(bev_map_rw_lock_singal);
     bev_map[peer_id] = peer;
     rw_w_unlock(bev_map_rw_lock_singal);
 
     set_connection_cb(peer_id);
-//std::cout << "STOP" << std::endl;
+
     rw_w_lock(listen_vector_rw_lock_singal);
     listen_id_vector.push_back(peer_id);
     rw_w_unlock(listen_vector_rw_lock_singal);
-
+//std::cout << "listen id" << peer_id << std::endl;
     return peer_id;
 }
 
@@ -217,7 +218,8 @@ void LibeventHandle::start_event_base_loop()
    #if LIBEVENT_HANDLE_DEBUG
    event_base_dispatch(main_base);
    #else
-   event_base_loop(main_base,EVLOOP_NO_EXIT_ON_EMPTY);
+   event_base_dispatch(main_base);
+  // event_base_loop(main_base,EVLOOP_NO_EXIT_ON_EMPTY);
    #endif
 }
 
@@ -246,7 +248,11 @@ bool LibeventHandle::send(const int connect_id,const char * send_bytes,const int
 int LibeventHandle::wait_recive(const int connect_id,char * recive_bytes,int * recive_size)
 {
     rw_r_lock(bev_map_rw_lock_singal);
-    if(bev_map.find(connect_id) == bev_map.end()) return false;
+    if(bev_map.find(connect_id) == bev_map.end())
+    {
+        rw_r_unlock(bev_map_rw_lock_singal);
+        return false;
+    }
     struct BevInfor & info = bev_map[connect_id];
     rw_r_unlock(bev_map_rw_lock_singal);
 
@@ -259,8 +265,13 @@ int LibeventHandle::wait_recive(const int connect_id,char * recive_bytes,int * r
 
 int LibeventHandle::get_recive_buffer_length(const int connect_id)
 {
+    //std::cout << "get_recive_buffer_length listen singal :" <<bev_map_rw_lock_singal.load()  << std::endl;
     rw_r_lock(bev_map_rw_lock_singal);
-    if(bev_map.find(connect_id) == bev_map.end()) return false;
+    if(bev_map.find(connect_id) == bev_map.end())
+    {
+        rw_r_unlock(bev_map_rw_lock_singal);
+        return false;
+    }
     struct BevInfor & info = bev_map[connect_id];
     rw_r_unlock(bev_map_rw_lock_singal);
 
@@ -546,8 +557,11 @@ void connlistener_cb(struct evconnlistener * listener, evutil_socket_t fd, struc
     {
         #if LIBEVENT_HANDLE_DEBUG
             std::cout << "first view for ip : "<<inet_ntoa(addr->sin_addr) <<" and port : " << addr->sin_port << std::endl;
+           // std::cout <<"p1: "<< handle_ptr->local_port << fd << std::endl;
         #endif // DEBUG
+
         handle_ptr->add_bufferevent_listen(inet_ntoa(addr->sin_addr),addr->sin_port,fd);
+         //std::cout << "p2: " <<handle_ptr->local_port << fd << std::endl;
     }
 }
 
