@@ -7,12 +7,12 @@
 
 using namespace std;
 
-void callback(EventType event, void * arg)
+void callback(NET_EVENT event, void * arg)
 {
      std::cout << "recive function"  <<std::endl;
     switch (event)
     {
-    case LibeventHandle::EVENT_RECIVE:
+    case NET_EVENT::RECIVE:
         std::cout << "recive callback invoke !!"  <<std::endl;
         break;
 
@@ -36,7 +36,7 @@ int main(int argc,char * argv[])
 
     //LibeventHandle::event_loop_run(&lib);
     //int last_count =
-    lib.set_event_callback(callback,NULL);
+    //lib.set_event_callback(callback,NULL);
 
     int listen_array[100];
     char temp_buf[50];

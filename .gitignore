@@ -1,9 +1,6 @@
 
-#ignore cmake build files
-CMakeFiles/
-#*.cmake
-CMakeCache.txt
-Testing
+#ignare cmaek build
+build/
 
 #ignore target
 target/
