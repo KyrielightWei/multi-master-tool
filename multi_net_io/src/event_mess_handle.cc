@@ -6,9 +6,12 @@ const char *MessageError::getEventErrorStr(EventMessageErrorNo no)
 }
 
 const char *MessageError::EVENT_ERROR_STRING[] = {
-    "event message has none error",
-    "incomplete arg : EventMessage"
-
+    "The event message has none error",
+    "The message is incomplete",
+    "Can't found this message group",
+    "Can't found this message type",
+    "No outstanding messages",
+    "Invalid host"
 };
 
 /***********************************
@@ -21,41 +24,56 @@ void EventMessage::copy(const EventMessage &src_mess)
     init_message_ptr();
 }
 
+ #define  MESSAGE_CURSOR_PTR  ((EventMessageCursor *)buffer_str.c_str())
 void EventMessage::init_buffer_str()
 {
     buffer_str = "";
     buffer_size = 0;
 
     buffer_str.append(sizeof(EventMessageCursor), 0);
-    cursor = (EventMessageCursor *)buffer_str.c_str();
-    buffer_size += sizeof(EventMessageCursor);
 
-    cursor->group_name_offset = buffer_size;
-    buffer_str.append(group_name, 0, strlen(group_name));
+    buffer_size += sizeof(EventMessageCursor);
+    MESSAGE_CURSOR_PTR->group_name_offset = buffer_size;
+    buffer_str.append( strlen(group_name)+1,0);
+    memcpy((void *)buffer_str.c_str()+buffer_size,group_name,strlen(group_name));
+//std::cout << "group name buffer ==== " << buffer_str.c_str()+buffer_size << std::endl;
     buffer_size += strlen(group_name) + 1;
 
-    cursor->mess_type_offset = buffer_size;
-    buffer_str.append(mess_type, 0, strlen(mess_type));
+    MESSAGE_CURSOR_PTR->mess_type_offset = buffer_size;
+    buffer_str.append(strlen(mess_type)+1,0);
+    memcpy((void *)buffer_str.c_str()+buffer_size,mess_type,strlen(mess_type));
+//std::cout << "mess type buffer ==== " << buffer_str.c_str()+buffer_size << std::endl;
     buffer_size += strlen(mess_type) + 1;
 
-    cursor->send_host_name_offset = buffer_size;
-    buffer_str.append(send_host_name, 0, strlen(send_host_name));
+
+    MESSAGE_CURSOR_PTR->send_host_name_offset = buffer_size;
+    buffer_str.append(strlen(send_host_name)+1,0);
+    memcpy((void *)buffer_str.c_str()+buffer_size,send_host_name,strlen(send_host_name));
     buffer_size += strlen(send_host_name) + 1;
 
-    cursor->recive_host_name_offset = buffer_size;
-    buffer_str.append(recive_host_name, 0, strlen(recive_host_name));
+    MESSAGE_CURSOR_PTR->recive_host_name_offset = buffer_size;
+    buffer_str.append(strlen(recive_host_name)+1,0);
+    memcpy((void *)buffer_str.c_str()+buffer_size,recive_host_name,strlen(recive_host_name));
     buffer_size += strlen(recive_host_name) + 1;
 
-    cursor->message_offset = buffer_size;
-    cursor->message_size = message_size;
-    buffer_str.append(message, 0, message_size - 1);
+    MESSAGE_CURSOR_PTR->message_offset = buffer_size;
+    MESSAGE_CURSOR_PTR->message_size = message_size;
+    buffer_str.append(message_size,0);
+    memcpy((void *)buffer_str.c_str()+buffer_size,message,message_size);
     buffer_size += message_size;
+
+    cursor = MESSAGE_CURSOR_PTR;
+   // std::cout <<"prepare send ====== "<<  buffer_str << " & " << cursor->send_host_name_offset  << std::endl;
+
+ //   std::cout << buffer_size << " | " << buffer_str.size() << std::endl;
 }
 
 void EventMessage::init_message_ptr()
 {
+  //   std::cout << buffer_size  <<" | " << sizeof(EventMessageCursor)<< std::endl;
     if (buffer_size <= sizeof(EventMessageCursor))
         return;
+// std::cout << "Group Name : " << (int64_t)group_name  <<" | " << (int64_t)buffer_str.c_str() << " | " << cursor->group_name_offset << std::endl;
     cursor = (EventMessageCursor *)buffer_str.c_str();
     group_name = (const char *)(buffer_str.c_str() + cursor->group_name_offset);
     mess_type = (const char *)(buffer_str.c_str() + cursor->mess_type_offset);
@@ -63,6 +81,7 @@ void EventMessage::init_message_ptr()
     recive_host_name = (const char *)(buffer_str.c_str() + cursor->recive_host_name_offset);
     message = (const char *)(buffer_str.c_str() + cursor->message_offset);
     message_size = cursor->message_size;
+  //  std::cout <<"prepare receive ====== "<<  buffer_str << " & " << cursor->send_host_name_offset << std::endl;
 }
 
 /***********************************
@@ -77,6 +96,10 @@ bool EventMessageHandle::init_handle(const char *host_config_path, const char *m
         return false;
 
     read_config(host_config_path, mess_config_path);
+
+#ifdef EVENT_MESS_HANDLE_DEBUG
+    std::cout <<"LOCAL HOST NAME" << " : " << local_host_name << std::endl;
+#endif // DEBUG
     //init_group_infor_map();
 }
 
@@ -125,25 +148,40 @@ bool EventMessageHandle::register_recive_handler(const char * group_name, const 
 
 int EventMessageHandle::readMessage(EventMessage *mess_ptr)
 {
-    if(check_mess_type(mess_ptr))
+    if(!mess_ptr->will_recive)
     {
+        mess_ptr->error_no =  MessageError::EventMessageErrorNo::INCOMPLETE_MESSAGE;
+        return -1;
+    }
+
+    if(!check_mess_type(mess_ptr))
+    {
+        //mess_ptr->error_no =  MessageError::EventMessageErrorNo::
         return -1;
     }
 
     auto & mess_type_map = mess_group_map[mess_ptr->group_name]->mess_callback_map;
     if(mess_type_map[mess_ptr->mess_type].unprocessed_mess_list.empty())
     {
+        mess_ptr->error_no =  MessageError::EventMessageErrorNo::NONE_UNPROCESSED_MESSAGE;
         return 0;
     }
 
     mess_ptr->copy(mess_type_map[mess_ptr->mess_type].unprocessed_mess_list.front());
+    mess_type_map[mess_ptr->mess_type].unprocessed_mess_list.erase(mess_type_map[mess_ptr->mess_type].unprocessed_mess_list.begin());
     return 1;
 }
 
 
 int EventMessageHandle::sendMessage(EventMessage *mess_ptr)
 {
-    if(check_mess_type(mess_ptr))
+    if(!mess_ptr->will_send)
+    {
+        mess_ptr->error_no =  MessageError::EventMessageErrorNo::INCOMPLETE_MESSAGE;
+        return -1;
+    }
+
+    if(!check_mess_type(mess_ptr))
     {
         return -1;
     }
@@ -155,15 +193,27 @@ int EventMessageHandle::sendMessage(EventMessage *mess_ptr)
 
     if(ip == NULL || port == 0)
     {
+        mess_ptr->error_no =  MessageError::EventMessageErrorNo::INVALID_HOST;
         return -1;
     }
+
+#ifdef EVENT_MESS_HANDLE_DEBUG
+    std::cout << ip << " : " << port << std::endl;
+#endif // DEBUG
 
     mess_ptr->send_host_name = local_host_name.c_str();
     mess_ptr->init_buffer_str();
 
     int connect_id = event_handle.get_connection_id(ip,port,true);
 
-    event_handle.send(connect_id,mess_ptr->buffer_str.c_str(),mess_ptr->buffer_size);
+    bool return_bool = event_handle.send(connect_id,mess_ptr->buffer_str.c_str(),mess_ptr->buffer_size);
+
+#ifdef EVENT_MESS_HANDLE_DEBUG
+    std::cout << "Libevent Send Return "<< return_bool << std::endl;
+    std::cout << "Send Buffer : "<< mess_ptr->buffer_str << std::endl;
+    std::cout << "Send Size : "<< mess_ptr->buffer_str.size() << std::endl;
+#endif // DEBUG
+    return 1;
 }
 
 void EventMessageHandle::read_config(const char *host_config_path, const char *mess_config_path)
@@ -221,6 +271,11 @@ void EventMessageHandle::init_group_infor_map(rapidjson::Document &mess_config_d
 
         local_port = group_ptr->host_port_map[local_host_name];
         group_ptr->handle.init_handle(local_port);
+        group_ptr->handle.set_event_callback(libevent_callback,this);
+
+#ifdef EVENT_MESS_HANDLE_DEBUG
+    std::cout << "Listen Port ："<<local_port << std::endl;
+#endif // DEBUG
 
         for (auto &mess_type : mess_config_doc[i]["mess_type"].GetArray())
         {
@@ -288,13 +343,19 @@ LibeventHandle *EventMessageHandle::get_libeventhandle(const char *group_name)
 
 bool EventMessageHandle::check_mess_type(EventMessage * mess_ptr)
 {
+   // std::cout << "STOP & "<<(int64_t)mess_ptr->mess_type << std::endl;
+   #ifdef EVENT_MESS_HANDLE_DEBUG
+   std::cout << "Check Mess Type : " << "group name = "<<mess_ptr->group_name << " & " << "message type = " << mess_ptr->mess_type << std::endl;
+   #endif // DEBUG
     if(mess_group_map.find(mess_ptr->group_name) == mess_group_map.end())
     {
+        mess_ptr->error_no =  MessageError::EventMessageErrorNo::GROUP_NOT_FOUND;
         return false;
     }
     auto & mess_type_map = mess_group_map[mess_ptr->group_name]->mess_callback_map;
     if(mess_type_map.find(mess_ptr->mess_type) == mess_type_map.end())
     {
+        mess_ptr->error_no =  MessageError::EventMessageErrorNo::MESS_TYPE_NOT_FOUND;
         return false;
     }
     return true;
@@ -302,12 +363,14 @@ bool EventMessageHandle::check_mess_type(EventMessage * mess_ptr)
 
 bool EventMessageHandle::try_run_callback(EventMessage * mess_ptr)
 {
-    if(! check_mess_type(mess_ptr))
+    //std::cout << "************* try callback" << std::endl;
+    if(!check_mess_type(mess_ptr))
     {
         return false;
     }
 
     CallbackInfor * cb_infor_ptr = & mess_group_map[mess_ptr->group_name]->mess_callback_map[mess_ptr->mess_type];
+  //  std::cout << "************* cb_function" << (int64_t)cb_infor_ptr->cb_function <<" ; " << cb_infor_ptr->unprocessed_mess_list.size() <<std::endl;
     if(cb_infor_ptr->cb_function != NULL)
     {
         (*cb_infor_ptr->cb_function)(this,mess_ptr,cb_infor_ptr->cb_arg);
@@ -323,11 +386,18 @@ bool EventMessageHandle::read_callback_message_from_libevent(int connect_id,Libe
 {
     // read one message from libevent
     EventMessage mess;
+
     int recive_size = handle_ptr->recive_str(connect_id,mess.buffer_str,false); // run in callback function,not wait
+    mess.buffer_size = recive_size;
     if(recive_size <= 0)
     {
         return false;
     }
+#ifdef EVENT_MESS_HANDLE_DEBUG
+    std::cout << "Recive Buffer : " << mess.buffer_str << std::endl;
+    std::cout << "Recive Buffer SIZE : " << mess.buffer_str.size() << std::endl;
+#endif // DEBUG
+
     mess.init_message_ptr();
 
     // try run some callback
@@ -346,5 +416,6 @@ void libevent_callback(NET_EVENT event_id, NetworkHandle *handle, int connect_id
     //read message from libevent
     //get mess_type in message_type
     //call mess_handle->try_run_callback
+
     mess_handle->read_callback_message_from_libevent(connect_id,event_handle);
 }

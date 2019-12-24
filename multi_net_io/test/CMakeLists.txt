@@ -1,6 +1,10 @@
 # test CMakeLists.list
 enable_testing()
 
+set(TEST_SOURCE_DIR "${CMAKE_SOURCE_DIR}/multi_net_io/test/")
+configure_file("test_config.h.in" "test_config.h")
+
+
 # test functions
 function(compile_and_test exec_file code_file arg result)
     add_executable(${exec_file} ${code_file})

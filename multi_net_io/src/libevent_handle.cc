@@ -286,7 +286,7 @@ int LibeventHandle::recive_str(const int connect_id, std::string &buffer_str, bo
             return 0;
         }
     }
-
+ //std::cout << " STOP recive_str length ：" << get_recive_buffer_length(connect_id) << std::endl;
     return readBufferOnce(info, buffer_str);
 }
 
@@ -440,10 +440,16 @@ int LibeventHandle::readBufferOnce(struct BevInfor &info, std::string &buffer_st
 
     buffer_str.append(max_size,0);
     char * data =(char *)buffer_str.c_str();
+    //char data[1024];
     read_size = 0;
     while (read_size < max_size)
     {
         read_size += bufferevent_read(info.bev, data + read_size, max_size - read_size);
+        //  for(int i = 0;i<90;i++)
+        //  {
+        //      std::cout << " "<< data[i];
+        //  }
+        //  std::cout << "READ Data: " << read_size << std::endl;
         if (read_size < 0)
         {
 #if LIBEVENT_HANDLE_DEBUG
@@ -456,6 +462,7 @@ int LibeventHandle::readBufferOnce(struct BevInfor &info, std::string &buffer_st
         }
     }
     rw_w_unlock(*(info.read_singal_ptr));
+
     return read_size;
 }
 

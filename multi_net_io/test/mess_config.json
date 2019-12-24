@@ -8,7 +8,7 @@
             },
             {
                 "name":"host2",
-                "port":25545
+                "port":25546
             }
         ],
         "mess_type": [

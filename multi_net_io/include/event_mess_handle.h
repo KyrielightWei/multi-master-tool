@@ -10,7 +10,7 @@
 #include <vector>
 #include <list>
 
-#define EVENT_MESS_HANDLE_DEBUG 1
+//#define EVENT_MESS_HANDLE_DEBUG 1
 
 namespace MessageError
 {
@@ -18,8 +18,11 @@ namespace MessageError
     enum EventMessageErrorNo
     {
         SUCCESS = 0,
-        INCOMPLETE_ARG = 1,
-
+        INCOMPLETE_MESSAGE = 1,
+        GROUP_NOT_FOUND=2,
+        MESS_TYPE_NOT_FOUND = 3,
+        NONE_UNPROCESSED_MESSAGE=4,
+        INVALID_HOST=5
     };
 
     const char *getEventErrorStr(EventMessageErrorNo no);
@@ -60,12 +63,16 @@ class EventMessage
             message = mess,
             message_size = mess_size;
             error_no = MessageError::EventMessageErrorNo::SUCCESS;
+            will_send = true;
+            will_recive = false;
         }
 
     void  prepare_recive(const char * g_name,const char * msg_type)
     {
         group_name = g_name;
         mess_type = msg_type;
+        will_send = false;
+        will_recive = true;
     }
 
     const char  * group_name;
@@ -74,7 +81,12 @@ class EventMessage
     const char  * recive_host_name;
     const char  * message;
     uint32_t message_size;
+
+    // read only
     MessageError::EventMessageErrorNo error_no;
+    bool will_send;
+    bool will_recive;
+
 
     //-------------------------------------------------------------------------------------------------------------------------
 
@@ -102,6 +114,7 @@ class EventMessage
     std::string buffer_str;
     uint32_t buffer_size;
 
+
     void clear()
     {
         group_name = mess_type = send_host_name = recive_host_name = 0;
@@ -111,6 +124,8 @@ class EventMessage
         error_no=MessageError::EventMessageErrorNo::SUCCESS;
         buffer_str = "";
         buffer_size = 0;
+        will_send = false;
+        will_recive = false;
     }
 
     void init_buffer_str(); //when you want to send
