@@ -13,7 +13,10 @@
         ],
         "mess_type": [
             {
-                "name": "heart"
+                "name":"heart"
+            },
+            {
+                "name":"reply"
             }
         ]
     },

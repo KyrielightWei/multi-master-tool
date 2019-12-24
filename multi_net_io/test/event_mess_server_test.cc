@@ -3,6 +3,15 @@
 
 using namespace std;
 
+
+ void server_recive_cb(EventMessageHandle * mess_handle,EventMessage * mess,void * arg)
+ {
+     EventMessage reply;
+     cout << "Recive from Group "<<mess->group_name<<"["<<mess->mess_type<<"] : " << mess->message << endl;
+     reply.prepare_send(mess->group_name,mess->mess_type,mess->send_host_name,mess->message,mess->message_size);
+     mess_handle->sendMessage(&reply);
+ }
+
 int main(void)
 {
     EventMessageHandle handler;
@@ -12,6 +21,7 @@ int main(void)
     cout << "host config file path = " << host_config_path << endl << "message config file path = " << mess_config_path << endl;
     handler.init_handle(host_config_path.c_str(),mess_config_path.c_str());
 
+    handler.register_recive_handler("admin","reply",server_recive_cb,NULL);
 
     cout << "Message Server Test" << endl;
     //cout << "---------- Message Callback Recive Test ------------" << endl;
