@@ -172,6 +172,18 @@ int EventMessageHandle::readMessage(EventMessage *mess_ptr)
     return 1;
 }
 
+uint32_t EventMessageHandle::get_unprocessed_message_count(const char * group_name,const char * mess_type)
+{
+    EventMessage mess;
+    mess.group_name = group_name;
+    mess.mess_type = mess_type;
+    if(!check_mess_type(&mess))
+    {
+        return 0;
+    }
+
+    return mess_group_map[group_name]->mess_callback_map[mess_type].unprocessed_mess_list.size();
+}
 
 int EventMessageHandle::sendMessage(EventMessage *mess_ptr)
 {

@@ -75,6 +75,19 @@ class EventMessage
         will_recive = true;
     }
 
+    void clear()
+    {
+        group_name = mess_type = send_host_name = recive_host_name = 0;
+        message = 0;
+        message_size = 0;
+        cursor=0;
+        error_no=MessageError::EventMessageErrorNo::SUCCESS;
+        buffer_str = "";
+        buffer_size = 0;
+        will_send = false;
+        will_recive = false;
+    }
+
     const char  * group_name;
     const char  * mess_type;
     const char  * send_host_name;
@@ -114,19 +127,6 @@ class EventMessage
     std::string buffer_str;
     uint32_t buffer_size;
 
-
-    void clear()
-    {
-        group_name = mess_type = send_host_name = recive_host_name = 0;
-        message = 0;
-        message_size = 0;
-        cursor=0;
-        error_no=MessageError::EventMessageErrorNo::SUCCESS;
-        buffer_str = "";
-        buffer_size = 0;
-        will_send = false;
-        will_recive = false;
-    }
 
     void init_buffer_str(); //when you want to send
     void init_message_ptr(); //when you recive a message string
@@ -180,6 +180,9 @@ public:
 
     //recive message
     int readMessage(EventMessage *mess); //message size
+
+    //get unprocessed message count
+    uint32_t get_unprocessed_message_count(const char * group_name,const char * mess_type);
 
     //send message
     int sendMessage(EventMessage *mess);

@@ -33,19 +33,20 @@ int main(void)
         EventMessage while_mess;
 
         while_mess.prepare_recive("admin","heart");
-        return_code = handler.readMessage(&while_mess);
-        cout << "readMessage return_code : " << return_code << endl;
-        if(return_code <= 0)
-        {
-             cout << "read error" << std::endl;
-             cout << MessageError::getEventErrorStr(while_mess.error_no) << endl;
-        }
-        else
-        {
-            cout <<"READ RESULT : " <<while_mess.message << std::endl;
-            cout <<"READ MESS TYPE : " <<while_mess.mess_type << std::endl;
-            count++;
-        }
+        // return_code = handler.readMessage(&while_mess);
+        // cout << "readMessage return_code : " << return_code << endl;
+        // if(return_code <= 0)
+        // {
+        //      cout << "read error" << std::endl;
+        //      cout << MessageError::getEventErrorStr(while_mess.error_no) << endl;
+        // }
+        // else
+        // {
+        //     cout <<"READ RESULT : " <<while_mess.message << std::endl;
+        //     cout <<"READ MESS TYPE : " <<while_mess.mess_type << std::endl;
+        //     count++;
+        // }
+        cout << "Message Count : " << handler.get_unprocessed_message_count("admin","heart") << endl;
         sleep(5);
     }
 }

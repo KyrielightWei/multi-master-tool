@@ -483,7 +483,7 @@ bool LibeventHandle::writeBufferOnce(struct BevInfor &info, const char *data, co
         rw_w_unlock(*(info.write_singal_ptr));
         return false;
     }
-
+//std::cout << "STOP!!!" <<std::endl;
     if (bufferevent_write(info.bev, data, data_size) < 0)
     {
 #if LIBEVENT_HANDLE_DEBUG
@@ -687,5 +687,5 @@ void default_bufferevent_write_cb(struct bufferevent *bev, void *ctx)
     std::cout << "evbuffer length : " << evbuffer_get_length(buf) << std::endl;
 #endif // DEBUG
 
-    LibeventHandle *lib = (LibeventHandle *)ctx;
+   // LibeventHandle *lib = (LibeventHandle *)ctx;
 }

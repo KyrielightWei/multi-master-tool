@@ -136,7 +136,7 @@ class LibeventHandle:public NetworkHandle
     void start_event_base_loop();
 
     void set_connection_cb(int id,
-    bufferevent_data_cb readcb = default_bufferevent_read_cb , bufferevent_data_cb writecb = default_bufferevent_write_cb,
+    bufferevent_data_cb readcb = default_bufferevent_read_cb , bufferevent_data_cb writecb = NULL,//default_bufferevent_write_cb,
     bufferevent_event_cb eventcb = NULL , void *cbarg = NULL);
 
     int add_bufferevent_connect(const char* ip,const int port);
