@@ -3,8 +3,18 @@
 
 #include "libevent_handle.h"
 
-#include "rapidjson/filereadstream.h"
-#include "rapidjson/document.h"
+#ifdef __cplusplus
+
+#include <cstddef>
+#define RAPIDJSON_NO_SIZETYPEDEFINE
+namespace rapidjson {
+typedef ::std::size_t SizeType;
+}
+#endif
+
+//#include <rapidjson/rapidjson.h>
+#include <rapidjson/filereadstream.h>
+#include <rapidjson/document.h>
 #include <cstdio>
 #include <iostream>
 #include <vector>
