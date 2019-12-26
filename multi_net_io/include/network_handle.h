@@ -9,12 +9,16 @@
 #include<string>
 #include <iostream>
 
-typedef int EventType;
-typedef void (*NetworkHandle_CB)(EventType event, void * arg);
+enum NET_EVENT
+{
+    RECIVE=0
+};
 
 class NetworkHandle
 {
     public:
+    typedef void (*NetworkHandle_CB)(NET_EVENT event_id,NetworkHandle * handle,int connect_id,void * arg); //libevent_handle contain callback args
+
     virtual bool init_handle()=0;
     //init_clientHandle
     virtual bool free_handle()=0;
@@ -36,8 +40,9 @@ class NetworkHandle
 
     virtual void set_event_callback(NetworkHandle_CB cb,void * arg)=0;
 
-    static const EventType EVENT_RECIVE = 1;
+    //static const EventType EVENT_RECIVE = 1;
 };
+
 
 
 #endif // !NETWORK_HANDLE_HEADER

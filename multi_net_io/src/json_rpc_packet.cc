@@ -1,8 +1,7 @@
 #include "json_rpc_packet.h"
 
-
 /******************************************************
- * JsonPacket 
+ * JsonPacket
 ******************************************************/
 const char *JsonRpcPacket::get_string_ptr()
 {
@@ -134,8 +133,8 @@ bool JsonRpcPacket::BufferReadHandler::Uint(unsigned u)
 {
     #if JSON_PACKET_DEBUG
         cout << "Uint(" << u << ")" << endl;// return true;
-    #endif 
-     
+    #endif
+
     ParseItem item;
     item = parse_stack.top();
     parse_stack.pop();
@@ -151,7 +150,7 @@ bool JsonRpcPacket::BufferReadHandler::Uint(unsigned u)
     }
     else if(item.key == "SegmentType")
     {
-        
+
     }
     else
     {
@@ -166,8 +165,8 @@ bool JsonRpcPacket::BufferReadHandler::String(const char *str, SizeType length, 
 {
     #if JSON_PACKET_DEBUG
        cout << "String(" << str << ", " << length << ", "  << copy << ")" << endl;
-    #endif    
-   
+    #endif
+
     ParseItem item;
     item  = parse_stack.top();
     parse_stack.pop();
@@ -203,7 +202,7 @@ bool JsonRpcPacket::BufferReadHandler::String(const char *str, SizeType length, 
         cout << "--------- val_offset: "<<  val_offset << endl;
         cout << "start : " << start_offset << " ptr_offset : " << ptr_offset << ";"<< std::endl;
         #endif // 0
-        
+
         objectBuffer.put((const char *)&address,start_offset+ptr_offset,sizeof(address)); // modify address
 
         #if JSON_PACKET_DEBUG
@@ -223,34 +222,34 @@ bool JsonRpcPacket::BufferReadHandler::StartObject()
 {
      #if JSON_PACKET_DEBUG
        cout << "StartObject()" << endl;// return true;
-    #endif  
-    
+    #endif
+
     ParseItem item;
     item.key = "";
-    item.type = ParseType::OBJECT; 
+    item.type = ParseType::OBJECT;
     parse_stack.push(item);
     return true;
 }
 
-bool JsonRpcPacket::BufferReadHandler::Key(const char *str, SizeType length, bool copy) 
+bool JsonRpcPacket::BufferReadHandler::Key(const char *str, SizeType length, bool copy)
 {
     #if JSON_PACKET_DEBUG
        cout << "Key(" << str << ", " << length << ", "  << copy << ")" << endl;
-    #endif  
-     
+    #endif
+
     ParseItem item;
     item.key = std::string(str,length);
-    item.type = ParseType::KEY; 
+    item.type = ParseType::KEY;
     parse_stack.push(item);
     return true;
 }
 
-bool JsonRpcPacket::BufferReadHandler::EndObject(SizeType memberCount) 
+bool JsonRpcPacket::BufferReadHandler::EndObject(SizeType memberCount)
 {
     #if JSON_PACKET_DEBUG
       cout << "EndObject(" << memberCount << ")" << endl; //return true;
-    #endif  
-   
+    #endif
+
     ParseItem item;
     item = parse_stack.top();
     parse_stack.pop();
@@ -262,12 +261,12 @@ bool JsonRpcPacket::BufferReadHandler::EndObject(SizeType memberCount)
     return true;
 }
 
-bool JsonRpcPacket::BufferReadHandler::StartArray() 
+bool JsonRpcPacket::BufferReadHandler::StartArray()
 {
     #if JSON_PACKET_DEBUG
      cout << "StartArray()" << endl; //return true;
-    #endif  
-    
+    #endif
+
     ParseItem item;
     if(!parse_stack.empty())
         item = parse_stack.top();
@@ -275,19 +274,19 @@ bool JsonRpcPacket::BufferReadHandler::StartArray()
     {
         parse_stack.pop();
     }
-   
+
     item.key = "";
-    item.type = ParseType::ARRAY; 
+    item.type = ParseType::ARRAY;
     parse_stack.push(item);
     return true;
 }
 
-bool JsonRpcPacket::BufferReadHandler::EndArray(SizeType elementCount) 
+bool JsonRpcPacket::BufferReadHandler::EndArray(SizeType elementCount)
 {
      #if JSON_PACKET_DEBUG
       cout << "EndArray(" << elementCount << ")" << endl;// return true;
-    #endif  
-    
+    #endif
+
     ParseItem item;
     item = parse_stack.top();
     parse_stack.pop();
