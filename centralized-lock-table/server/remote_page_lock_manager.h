@@ -12,21 +12,27 @@
 class RemotePageLockManager
 {
     public:
+
+    static const bool lock_compatibility_matrix[2][2];
     static ulint cal_fold(uint32_t m_space,uint32_t m_page_no);
 
     static void lock_request_callback(EventMessageHandle * mess_handle,EventMessage * mess,void * arg);
 
     // public API
-    void init(const char * host_config_path,const char * mess_config_path);
-    void free();
-    void listen(); // listen lock request
+    void lock_manager_init(const char * host_config_path,const char * mess_config_path);
+    void lock_manager_free();
+    void lock_manager_listen(); // listen lock request
 
     //callback API
-    int handlePageLockRequest(PageLockRequest * request,PageLockReply * reply);
+
+    int check_lock_request(const char * asker,PageLockRequest * request,PageLockReply * reply);
 
     private:
-    int check_lock_request(PageLockRequest * request,PageLockReply * reply);
-    int insert_page_lock_t(PageLockRequest * request);
+
+    int insert_page_lock_t(const char * asker,PageLockRequest * request);
+    int update_unlock_page_lock_t(const char * asker,PageLockRequest * request,PageLock_t * page_lock);
+    int update_success_page_lock_t(const char * asker,PageLockRequest * request,PageLock_t * page_lock);
+    int update_fail_page_lock_t(const char * asker,PageLockRequest * request,PageLock_t * page_lock);
 
     struct PageLock_t * page_lock_hash;
     EventMessageHandle msg_handle;

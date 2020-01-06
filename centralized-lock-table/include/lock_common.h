@@ -1,18 +1,20 @@
 #ifndef LOCK_COMMON_HEADER
 #define LOCK_COMMON_HEADER
 
+#include <string>
 #include<vector>
 #include<list>
+#include<map>
 #include "uthash.h"
 
 typedef unsigned long int ulint;
 
 enum PageLockType
 {
-    R_LOCK,
-    W_LOCK,
+    R_LOCK = 0,
+    W_LOCK = 1,
     UNLOCK
-};
+}; // unlock must be last; others will sort by lock level
 
 enum PageReplyType
 {
@@ -31,6 +33,12 @@ enum PageReplyType
  * Node will require a page from lock manager before requiring from storage.
  * **/
 
+struct WaitInfor
+{
+    std::string name;
+    PageLockType type;
+};
+
 /* Lock Table Item Information */
 struct PageLock_t
 {
@@ -38,11 +46,11 @@ struct PageLock_t
     uint32_t space_id;
     uint32_t page_no;
     uint64_t version_no;
-    PageLockType lock;
-    const char * page_holder; //page location
-    std::list<const char *> lock_holder;
-    std::list<const char *> wait_list;
-    UT_hash_handle hash_handle;
+    PageLockType lock_type;
+   // const char * page_holder; //page location
+    std::list<std::string> lock_holder;
+    std::list<WaitInfor> wait_list;
+    UT_hash_handle hh;
 };
 
 /* Lock Request
@@ -62,9 +70,8 @@ struct PageLockReply
 {
     uint32_t space_id;
     uint32_t page_no;
-    const char * page_holder;
+//    const char * page_holder;
     PageReplyType reply_type;
 };
-
 
 #endif

@@ -3,6 +3,13 @@
 #include <iostream>
 #endif
 
+
+const bool RemotePageLockManager::lock_compatibility_matrix[2][2] = {
+          /*s , x*/   //v:request ; h:status
+    /*s*/ {true,false},
+    /*x*/ {false,false}
+};
+
 /********************************
  * Static Functions
 *********************************/
@@ -19,16 +26,16 @@ void RemotePageLockManager::lock_request_callback(EventMessageHandle * mess_hand
     #endif
     RemotePageLockManager * lock_manager = (RemotePageLockManager * )arg;
     PageLockReply reply;
-    lock_manager->handlePageLockRequest((struct PageLockRequest *)mess->message,&reply);
+    lock_manager->check_lock_request(mess->send_host_name,(struct PageLockRequest *)mess->message,&reply);
 
     EventMessage replyMsg;
-    replyMsg.prepare_send(mess->group_name,"PageLockReply",mess->send_host_name, &reply,sizeof(PageLockReply));
+    replyMsg.prepare_send(mess->group_name,"PageLockReply",mess->send_host_name,(const char *)&reply,sizeof(PageLockReply));
 }
 
 /********************************
  * Public Member Functions
 *********************************/
-void RemotePageLockManager::init(const char * host_config_path,const char * mess_config_path)
+void RemotePageLockManager::lock_manager_init(const char * host_config_path,const char * mess_config_path)
 {
     msg_handle.init_handle(host_config_path, mess_config_path);
 
@@ -45,12 +52,12 @@ void RemotePageLockManager::init(const char * host_config_path,const char * mess
     msg_handle.register_recive_handler( "centralized_lock", "PageLockRequest",lock_request_callback,NULL);
 }
 
-void RemotePageLockManager::free()
+void RemotePageLockManager::lock_manager_free()
 {
     msg_handle.free_handle();
 }
 
-void RemotePageLockManager::listen()
+void RemotePageLockManager::lock_manager_listen()
 {
     while(1)
     {
@@ -58,27 +65,126 @@ void RemotePageLockManager::listen()
     }
 }
 
-int RemotePageLockManager::handlePageLockRequest(PageLockRequest * request,PageLockReply * reply)
-{
-    /*
+ /*
     1. Check lock request, construct page lock reply
         Return ---- 0 : no page_lock_t
         Return ---- 1 : lock succeeded
+        Reurn ----- 2 : unlock succeeded
         Return ---- -1 : lock failed
     2. if 0 ,insert page_lock_t
-    */
+*/
+int RemotePageLockManager::check_lock_request(const char * asker,PageLockRequest * request,PageLockReply * reply)
+{
+    ulint fold = cal_fold(request->space_id,request->page_no);
+
+    struct PageLock_t * page_lock_infor = NULL;
+
+    HASH_FIND_INT(page_lock_hash,&fold,page_lock_infor);
+
+    reply->space_id = request->space_id;
+    reply->page_no = request->page_no;
+
+    if(page_lock_infor == NULL)
+    {
+        insert_page_lock_t(asker,request);
+//        reply->page_holder = NULL;
+        reply->reply_type =  PageReplyType::LOCK_SUCCESS;
+        return 0;
+    }
+
+    if(request->lock_type == PageLockType::UNLOCK)
+    {
+        update_unlock_page_lock_t(asker,request,page_lock_infor);
+        reply->reply_type = PageReplyType::UNLOCK_SUCCESS;
+        return 2;
+    }
+
+    if( page_lock_infor->lock_type == PageLockType::UNLOCK)
+    {
+        update_success_page_lock_t(asker,request,page_lock_infor);
+        reply->reply_type = PageReplyType::LOCK_SUCCESS;
+        return 1;
+    }
+
+    if(lock_compatibility_matrix[request->lock_type][page_lock_infor->lock_type])
+    {
+        update_success_page_lock_t(asker,request,page_lock_infor);
+        reply->reply_type = PageReplyType::LOCK_SUCCESS;
+        return 1;
+    }
+    else
+    {
+        update_fail_page_lock_t(asker,request,page_lock_infor);
+        reply->reply_type = PageReplyType::LOCK_FAIL;
+        return -1;
+    }
 }
 
 /********************************
  * Private Member Functions
 *********************************/
 
-int RemotePageLockManager::check_lock_request(PageLockRequest * request,PageLockReply * reply)
-{
 
+int RemotePageLockManager::insert_page_lock_t(const char * asker,PageLockRequest * request)
+{
+    PageLock_t * page_lock = new PageLock_t;
+    page_lock->space_id = request->space_id;
+    page_lock->page_no = request->page_no;
+    page_lock->m_fold = cal_fold(page_lock->space_id,page_lock->page_no);
+    page_lock->version_no = 0;
+    page_lock->lock_type = request->lock_type;
+    page_lock->lock_holder.push_back(asker);
+
+    HASH_ADD_INT(page_lock_hash,m_fold,page_lock);
+    return 1;
 }
 
-int RemotePageLockManager::insert_page_lock_t(PageLockRequest * request)
+int RemotePageLockManager::update_unlock_page_lock_t(const char * asker,PageLockRequest * request,PageLock_t * page_lock)
 {
+    page_lock->lock_type = PageLockType::UNLOCK;
+    page_lock->lock_holder.remove(asker);
+    if(page_lock->lock_holder.empty())
+    {
+        // first waiter get lock
+        auto iter = page_lock->wait_list.begin();
+        page_lock->lock_holder.push_back(iter->name);
+        page_lock->lock_type = iter->type;
+        page_lock->wait_list.erase(iter);
+    }
+    return 1;
+}
 
+int  RemotePageLockManager::update_success_page_lock_t(const char * asker,PageLockRequest * request,PageLock_t * page_lock)
+{
+    if(request->lock_type == PageLockType::W_LOCK)
+    {
+        page_lock->version_no++;
+    }
+    page_lock->lock_type = request->lock_type;
+    page_lock->lock_holder.push_back(asker);
+
+    return 1;
+}
+
+int  RemotePageLockManager::update_fail_page_lock_t(const char * asker,PageLockRequest * request,PageLock_t * page_lock)
+{
+    bool found = false;
+    for(auto iter = page_lock->wait_list.begin();iter != page_lock->wait_list.end();iter++)
+    {
+        if(iter->name == asker)
+        {
+            if(request->lock_type > iter->type)
+            {
+                iter->type = request->lock_type;
+            }
+            found = true;
+        }
+    }
+    if(!found)
+    {
+        struct WaitInfor infor;
+        infor.name = asker;
+        infor.type = request->lock_type;
+    }
+    return 1;
 }
