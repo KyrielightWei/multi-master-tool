@@ -2,43 +2,34 @@
 #define REMOTE_PAGE_LOCK_MANAGER_HEADER
 
 #include <list>
-#include <map>
+#include <vector>
+#include "event_mess_handle.h"
 
-// typedef unsigned short uint16_t;
-// typedef unsigned int uint32_t;
-// typedef unsigned long long uint64_t;
+#include "lock_common.h"
 
-typedef unsigned long int ulint;
-
-/**
- * Version Update rule
- * 1. Version_no start from 0.It will increase but not reduce.
- * 2. When lock manager recive a write request about a page, it will add version_no of the page.
- * 3. Version_no is independent of any mysql node.
- * **/
-
-struct PageLock_t
-{
-    ulint m_fold;
-    uint32_t space_id;
-    uint32_t page_no;
-    uint64_t version_no;
-    int node_id; //page location
-    //std::map<int,uint64_t> history_version_map; // pair : node_id <-> verison_no  // client
-};
-
+#define REMOTE_PAGE_LOCK_MANAGER_DEBUG
 
 class RemotePageLockManager
 {
     public:
-    void init();
-    void free();
-
     static ulint cal_fold(uint32_t m_space,uint32_t m_page_no);
 
-    private:
-    std::map<ulint,PageLock_t *> page_lock_map;
+    static void lock_request_callback(EventMessageHandle * mess_handle,EventMessage * mess,void * arg);
 
+    // public API
+    void init(const char * host_config_path,const char * mess_config_path);
+    void free();
+    void listen(); // listen lock request
+
+    //callback API
+    int handlePageLockRequest(PageLockRequest * request,PageLockReply * reply);
+
+    private:
+    int check_lock_request(PageLockRequest * request,PageLockReply * reply);
+    int insert_page_lock_t(PageLockRequest * request);
+
+    struct PageLock_t * page_lock_hash;
+    EventMessageHandle msg_handle;
 };
 
 
