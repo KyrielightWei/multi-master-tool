@@ -74,4 +74,8 @@ struct PageLockReply
     PageReplyType reply_type;
 };
 
+
+#define REMOTE_LOCK_GROUP_NAME "centralized_lock"
+#define REMOTE_LOCK_REQUEST_MESS_TYPE "PageLockRequest"
+#define REMOTE_LOCK_REPLY_MESS_TYPE "PageLockReply"
 #endif

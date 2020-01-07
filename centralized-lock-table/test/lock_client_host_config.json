@@ -7,11 +7,11 @@
     {
         "name":"lock_client",
         "ip":"127.0.0.1",
-        "is_local":false
+        "is_local":true
     },
     {
         "name":"lock_server",
         "ip":"127.0.0.1",
-        "is_local":true
+        "is_local":false
     }
 ]

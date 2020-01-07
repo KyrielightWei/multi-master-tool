@@ -35,10 +35,10 @@ bool LibeventHandle::free_handle()
     event_base_loopexit(main_base, NULL);
     free(event_base_thread);
     evconnlistener_free(conn_listener);
-
     rw_w_lock(bev_map_rw_lock_singal);
-    for (auto it = bev_map.begin(); it != bev_map.end(); it++)
+    while(bev_map.empty())
     {
+        auto it = bev_map.begin();
         int id = it->first;
         remove_buffevent(id);
     }
@@ -622,7 +622,7 @@ void connlistener_cb(struct evconnlistener *listener, evutil_socket_t fd, struct
     LibeventHandle *handle_ptr = (LibeventHandle *)arg;
 
     struct sockaddr_in *addr = (struct sockaddr_in *)sock;
-
+// std::cout << "first view for ip : " << inet_ntoa(addr->sin_addr) << " and port : " << addr->sin_port << std::endl;
 #if LIBEVENT_HANDLE_DEBUG
     std::cout << "Recive Connect!" << std::endl;
 #endif // DEBUG
@@ -639,7 +639,6 @@ void connlistener_cb(struct evconnlistener *listener, evutil_socket_t fd, struct
         std::cout << "first view for ip : " << inet_ntoa(addr->sin_addr) << " and port : " << addr->sin_port << std::endl;
         // std::cout <<"p1: "<< handle_ptr->local_port << fd << std::endl;
 #endif // DEBUG
-
         handle_ptr->add_bufferevent_listen(inet_ntoa(addr->sin_addr), addr->sin_port, fd);
         //std::cout << "p2: " <<handle_ptr->local_port << fd << std::endl;
     }

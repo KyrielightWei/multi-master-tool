@@ -32,7 +32,8 @@ namespace MessageError
         GROUP_NOT_FOUND=2,
         MESS_TYPE_NOT_FOUND = 3,
         NONE_UNPROCESSED_MESSAGE=4,
-        INVALID_HOST=5
+        INVALID_HOST=5,
+        NONE_REQUESTED_MESSAGE=6
     };
 
     const char *getEventErrorStr(EventMessageErrorNo no);
@@ -60,7 +61,6 @@ struct EventMessageCursor
 class EventMessage
 {
     public:
-
     // Public API
     //-------------------------------------------------------------------------------------------------------------------------
     void  prepare_send(const char * g_name,const char * m_type,
@@ -142,6 +142,12 @@ class EventMessage
     void init_message_ptr(); //when you recive a message string
 };
 
+class EventMessageFilter
+{
+    public:
+    virtual bool operator()(EventMessage &)=0;
+};
+
 /**
  * 1. Read ip and host name from json file.  ------  host_config.json
  * 2. Declare Message Group and Message Type in json file. ------ message_type.json
@@ -190,12 +196,14 @@ public:
 
     //recive message
     int readMessage(EventMessage *mess); //message size
+    int readMessage(EventMessage *mess,EventMessageFilter & filter); //message filter
 
     //get unprocessed message count
     uint32_t get_unprocessed_message_count(const char * group_name,const char * mess_type);
 
     //send message
     int sendMessage(EventMessage *mess);
+
     //-------------------------------------------------------------------------------------------------------------------------
 
     private:

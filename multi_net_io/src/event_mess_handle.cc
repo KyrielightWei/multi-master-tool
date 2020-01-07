@@ -11,7 +11,8 @@ const char *MessageError::EVENT_ERROR_STRING[] = {
     "Can't found this message group",
     "Can't found this message type",
     "No outstanding messages",
-    "Invalid host"
+    "Invalid host",
+    "None requested messages"
 };
 
 /***********************************
@@ -170,6 +171,41 @@ int EventMessageHandle::readMessage(EventMessage *mess_ptr)
     mess_ptr->copy(mess_type_map[mess_ptr->mess_type].unprocessed_mess_list.front());
     mess_type_map[mess_ptr->mess_type].unprocessed_mess_list.erase(mess_type_map[mess_ptr->mess_type].unprocessed_mess_list.begin());
     return 1;
+}
+
+int EventMessageHandle::readMessage(EventMessage *mess_ptr,EventMessageFilter & filter)
+{
+    if(!mess_ptr->will_recive)
+    {
+        mess_ptr->error_no =  MessageError::EventMessageErrorNo::INCOMPLETE_MESSAGE;
+        return -1;
+    }
+
+    if(!check_mess_type(mess_ptr))
+    {
+        //mess_ptr->error_no =  MessageError::EventMessageErrorNo::
+        return -1;
+    }
+
+    auto & mess_type_map = mess_group_map[mess_ptr->group_name]->mess_callback_map;
+    if(mess_type_map[mess_ptr->mess_type].unprocessed_mess_list.empty())
+    {
+        mess_ptr->error_no =  MessageError::EventMessageErrorNo::NONE_UNPROCESSED_MESSAGE;
+        return 0;
+    }
+
+    auto iter = mess_type_map[mess_ptr->mess_type].unprocessed_mess_list.begin();
+    for(;iter != mess_type_map[mess_ptr->mess_type].unprocessed_mess_list.end();iter++)
+    {
+        if(filter(*iter))
+        {
+            mess_ptr->copy(*iter);
+            mess_type_map[mess_ptr->mess_type].unprocessed_mess_list.erase(iter);
+            return 1;
+        }
+    }
+    mess_ptr->error_no =  MessageError::EventMessageErrorNo::NONE_REQUESTED_MESSAGE;
+    return 0;
 }
 
 uint32_t EventMessageHandle::get_unprocessed_message_count(const char * group_name,const char * mess_type)

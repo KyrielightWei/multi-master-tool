@@ -7,7 +7,7 @@
                 "port":25557
             },
             {
-                "name":"host2",
+                "name":"lock_client",
                 "port":25558
             },
             {

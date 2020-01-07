@@ -30,6 +30,13 @@ void RemotePageLockManager::lock_request_callback(EventMessageHandle * mess_hand
 
     EventMessage replyMsg;
     replyMsg.prepare_send(mess->group_name,"PageLockReply",mess->send_host_name,(const char *)&reply,sizeof(PageLockReply));
+
+    if(mess_handle->sendMessage(&replyMsg)<0)
+    {
+        //std::cout << mess->send_host_name << std::endl;
+        std::cout << MessageError::getEventErrorStr( replyMsg.error_no) << std::endl;
+        assert(false);
+    }
 }
 
 /********************************
@@ -49,11 +56,12 @@ void RemotePageLockManager::lock_manager_init(const char * host_config_path,cons
      *      2. recive w lock request
      *      3. recive unlock request
     */
-    msg_handle.register_recive_handler( "centralized_lock", "PageLockRequest",lock_request_callback,NULL);
+    msg_handle.register_recive_handler( "centralized_lock", "PageLockRequest",lock_request_callback,this);
 }
 
 void RemotePageLockManager::lock_manager_free()
 {
+    //todo : free page_lock_t
     msg_handle.free_handle();
 }
 
@@ -75,12 +83,16 @@ void RemotePageLockManager::lock_manager_listen()
 */
 int RemotePageLockManager::check_lock_request(const char * asker,PageLockRequest * request,PageLockReply * reply)
 {
+//std::cout <<"page lock hash address :" << std::endl;// (int64_t)page_lock_hash << std::endl;
     ulint fold = cal_fold(request->space_id,request->page_no);
 
     struct PageLock_t * page_lock_infor = NULL;
 
-    HASH_FIND_INT(page_lock_hash,&fold,page_lock_infor);
-
+    if(page_lock_hash != NULL)
+        HASH_FIND_INT(page_lock_hash,&fold,page_lock_infor);
+    else
+        page_lock_infor = NULL;
+//std::cout << asker << std::endl;
     reply->space_id = request->space_id;
     reply->page_no = request->page_no;
 
@@ -145,11 +157,16 @@ int RemotePageLockManager::update_unlock_page_lock_t(const char * asker,PageLock
     page_lock->lock_holder.remove(asker);
     if(page_lock->lock_holder.empty())
     {
+       // std::cout << page_lock->wait_list.size() <<  std::endl;
         // first waiter get lock
-        auto iter = page_lock->wait_list.begin();
-        page_lock->lock_holder.push_back(iter->name);
-        page_lock->lock_type = iter->type;
-        page_lock->wait_list.erase(iter);
+        if(!page_lock->wait_list.empty())
+        {
+              auto iter = page_lock->wait_list.begin();
+            page_lock->lock_holder.push_back(iter->name);
+            page_lock->lock_type = iter->type;
+            page_lock->wait_list.erase(iter);
+        }
+
     }
     return 1;
 }
