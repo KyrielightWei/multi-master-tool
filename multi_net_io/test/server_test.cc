@@ -39,10 +39,10 @@ int main(int argc,char * argv[])
     //lib.set_event_callback(callback,NULL);
 
     int listen_array[100];
-    char temp_buf[50];
+    char temp_buf[1024*1024];
     while(1)
     {
-        memset(temp_buf,0,sizeof(char)*50);
+        memset(temp_buf,0,sizeof(char)*1024*1024);
         sleep(4);
         cout << "listen count " << lib.get_listen_connection_count() << std::endl;
         lib.get_listen_connection_array(listen_array);

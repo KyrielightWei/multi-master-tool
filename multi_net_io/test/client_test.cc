@@ -23,10 +23,10 @@ int main(int argc,char * argv[])
     int port2 = std::stoi(argv[2]);
     cout << "Local Port = " << port << std::endl;
     cout << "Connect Port = " << port2 << std::endl;
-    
-    
-    
-    
+
+
+
+
     if(!lib.init_handle(port))
     {
         cout << "init error" << std::endl;
@@ -36,7 +36,12 @@ int main(int argc,char * argv[])
         cout << "send ---- " << std::endl;
         int id = lib.get_connection_id("127.0.0.1",port2,true);
         cout <<  "connection id  :"<< id << std::endl;
-        int re = lib.send(id,"hdsbjadhkajlshsadasdasfdsajkdhjkashdjkashdjkahskjdhaskjhdkjashdjkhaskjdhakjshdkjashkdhsakjhdkjashjkdhjakshdkjashjkdhjasdasfvdzvzcvzxczxczxdkjashdkashdkjhaskjdhajo",163);
+       std::string mess_str = "";
+        for (int i=0 ; i< 1024*1024;i++)
+        {
+            mess_str += "w";
+        }
+        int re = lib.send(id,mess_str.c_str(),1024*1024);
         cout <<  "send return :"<< re << std::endl;
 
         lib.send(id,"HELLO",6);
@@ -44,11 +49,11 @@ int main(int argc,char * argv[])
         lib.send(id,"APPLE",6);
 
         lib.send(id,"WORLD",6);
-         
+
     }
-    
+
     //LibeventHandle::event_loop_run(&lib);
-    //int last_count = 
+    //int last_count =
     while(1)
     {
         // sleep(10);
