@@ -79,6 +79,7 @@ class LibeventHandle:public NetworkHandle
     bool send(const int id,const char * send_bytes,const int send_size);
     int wait_recive(const int id,char * recive_bytes,int sleep_interval=0);
 
+    int recive_str_Wait(const int id,std::string & buffer_str,int sleep_interval=0);
     int recive_str_NoWait(const int id,std::string & buffer_str);
 
     int get_recive_buffer_length(const int id);
@@ -115,7 +116,10 @@ class LibeventHandle:public NetworkHandle
     ~LibeventHandle()
     {
         if(isFree.load() == false)
+        {
+           // std::cout << "Free Handle in Destructor Function"<<std::endl;
             free_handle();
+        }
     }
 
     bool is_free()

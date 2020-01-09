@@ -432,33 +432,40 @@ bool EventMessageHandle::try_run_callback(EventMessage * mess_ptr)
 
 bool EventMessageHandle::read_callback_message_from_libevent(int connect_id,LibeventHandle *handle_ptr)
 {
-    // read one message from libevent
-    EventMessage mess;
-#ifdef EVENT_MESS_HANDLE_DEBUG
-   std::cout << "Recive String " << std::endl;
-#endif
-    int recive_size = handle_ptr->recive_str_NoWait(connect_id,mess.buffer_str); // run in callback function,not wait
-#ifdef EVENT_MESS_HANDLE_DEBUG
-   std::cout << "Recive Size "<< recive_size << std::endl;
-#endif
-    if(recive_size <= 0)
-    {
-        return false;
+    int count =0;
+     int recive_size =0;
+    while(handle_ptr->get_recive_buffer_length(connect_id) > 0){
+        //std:: cout << "while Start Recive Buffer Length: "  << handle_ptr->get_recive_buffer_length(connect_id) << std::endl;
+        // read one message from libevent
+        EventMessage mess;
+        #ifdef EVENT_MESS_HANDLE_DEBUG
+        std::cout << "Recive String " << std::endl;
+        #endif
+        recive_size = handle_ptr->recive_str_NoWait(connect_id,mess.buffer_str); // run in callback function,not wait
+        #ifdef EVENT_MESS_HANDLE_DEBUG
+        std::cout << "Recive Size "<< recive_size << std::endl;
+        #endif
+        std::cout << "Recive Size "<< recive_size << std::endl;
+        if(recive_size <= 0)
+        {
+            return false;
+        }
+        mess.buffer_size = recive_size;
+        #ifdef EVENT_MESS_HANDLE_DEBUG
+        std::cout << "Recive Buffer : " << mess.buffer_str << std::endl;
+        std::cout << "Recive Buffer SIZE : " << mess.buffer_str.size() << std::endl;
+        #endif // DEBUG
+
+        mess.init_message_ptr();
+
+        // try run some callback
+        if(!try_run_callback(&mess))
+        {
+            return false;
+        }
+       // std:: cout << "while count = " << count++ << std::endl;
     }
-    mess.buffer_size = recive_size;
-#ifdef EVENT_MESS_HANDLE_DEBUG
-    std::cout << "Recive Buffer : " << mess.buffer_str << std::endl;
-    std::cout << "Recive Buffer SIZE : " << mess.buffer_str.size() << std::endl;
-#endif // DEBUG
-
-    mess.init_message_ptr();
-
-    // try run some callback
-    if(!try_run_callback(&mess))
-    {
-        return false;
-    }
-
+     //std::cout << "++++++++++ Recive Buffer Length: " << handle_ptr->get_recive_buffer_length(connect_id) << std::endl;
     return true;
 }
 
@@ -470,5 +477,8 @@ void libevent_callback(NET_EVENT event_id, NetworkHandle *handle, int connect_id
     //get mess_type in message_type
     //call mess_handle->try_run_callback
     //std::cout << "libevent callback in event message" << std::endl;
+
     mess_handle->read_callback_message_from_libevent(connect_id,event_handle);
+
+    //std::cout << event_handle->get_recive_buffer_length(connect_id) << std::endl;
 }

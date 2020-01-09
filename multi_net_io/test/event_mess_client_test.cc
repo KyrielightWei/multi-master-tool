@@ -5,7 +5,7 @@ using namespace std;
 
  void client_recive_cb(EventMessageHandle * mess_handle,EventMessage * mess,void * arg)
  {
-    cout << "success get reply from Group "<<mess->group_name<<"["<<mess->mess_type<<"] : " << mess->message << endl;
+    cout << "success get reply from Group "<<mess->group_name<<"["<<mess->mess_type<<"] ---- Message : " << mess->message << endl;
  }
 
 
@@ -36,8 +36,8 @@ int main(void)
      }
      mess.prepare_send("admin","heart","host2",mess_str.c_str(),mess_str.size());
      handler.sendMessage(&mess);
-
-    while(1){
+int c = 0;
+    while(c<10){
         cout << "---------- Message Constantly Send Test ------------" << endl;
         EventMessage while_mess;
         EventMessage reply_mess;
@@ -58,7 +58,14 @@ int main(void)
             cout << while_mess.message << std::endl;
             count++;
         }
-
-        sleep(5);
+c++;
+cout << "client Test [ "<< c << "]"<< std::endl;
+        //sleep(5);
     }
+    while(1);
+    //handler.free_handle();
+cout << " END client Test" << std::endl;
+
+
+    return 0;
 }

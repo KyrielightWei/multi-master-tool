@@ -36,6 +36,7 @@ bool LibeventHandle::free_handle()
     free(event_base_thread);
     evconnlistener_free(conn_listener);
     rw_w_lock(bev_map_rw_lock_singal);
+    //std::cout <<"Free Bev Map Size ==== " << bev_map.size() << std::endl;
     while(bev_map.empty())
     {
         auto it = bev_map.begin();
@@ -254,6 +255,23 @@ int LibeventHandle::wait_recive(const int connect_id, char *recive_bytes,int sle
    return readBuffer_Wait(info,recive_bytes,sleep_interval);
 }
 
+ int LibeventHandle::recive_str_Wait(const int connect_id,std::string & buffer_str,int sleep_interval)
+ {
+     rw_r_lock(bev_map_rw_lock_singal);
+    if (bev_map.find(connect_id) == bev_map.end())
+    {
+        rw_r_unlock(bev_map_rw_lock_singal);
+        return -1;
+    }
+    struct BevInfor &info = bev_map[connect_id];
+    rw_r_unlock(bev_map_rw_lock_singal);
+
+    readBufferControlBlock_Wait(info,sleep_interval);
+    if(buffer_str.length() <= info.block.size)
+        buffer_str.append(info.block.size,0);
+    return readBuffer_Wait(info,(char *)buffer_str.c_str(),sleep_interval);
+ }
+
 int LibeventHandle::recive_str_NoWait(const int connect_id, std::string &buffer_str)
 {
     rw_r_lock(bev_map_rw_lock_singal);
@@ -449,12 +467,18 @@ int LibeventHandle::readBuffer_NoWait(struct BevInfor & info, char *data)
     // rw_r_unlock(*(info.read_singal_ptr));
     if(len<max_size)
     {
+        #if LIBEVENT_HANDLE_DEBUG
         std::cout << "============ NoWait recive evbuffer len :" <<len << std::endl;
+         #endif //
         rw_w_unlock(*(info.read_singal_ptr));
+       // std::cout << "============ NoWait !!!" <<len << std::endl;
+       bufferevent_setwatermark(info.bev, EV_READ ,max_size, 0);
+
         return 0;
     }
+    bufferevent_setwatermark(info.bev, EV_READ ,0, 0);
     // rw_w_lock(*(info.read_singal_ptr));
-
+ //std::cout << "============ NoWait !!!" <<len << std::endl;
     read_size = bufferevent_read(info.bev, data, max_size);
     if (read_size < 0)
     {
@@ -692,9 +716,9 @@ void default_bufferevent_read_cb(struct bufferevent *bev, void *ctx)
 void default_bufferevent_write_cb(struct bufferevent *bev, void *ctx)
 {
 #if LIBEVENT_HANDLE_DEBUG
-    std::cout << "write into evbuffer" << std::endl;
-    evbuffer *buf = bufferevent_get_output(bev);
-    std::cout << "evbuffer length : " << evbuffer_get_length(buf) << std::endl;
+    // std::cout << "write into evbuffer" << std::endl;
+    // evbuffer *buf = bufferevent_get_output(bev);
+    // std::cout << "evbuffer length : " << evbuffer_get_length(buf) << std::endl;
 #endif // DEBUG
 
    // LibeventHandle *lib = (LibeventHandle *)ctx;

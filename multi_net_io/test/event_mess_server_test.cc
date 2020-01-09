@@ -7,7 +7,7 @@ using namespace std;
  void server_recive_cb(EventMessageHandle * mess_handle,EventMessage * mess,void * arg)
  {
      EventMessage reply;
-     cout << "Recive from Group "<<mess->group_name<<"["<<mess->mess_type<<"] : " << mess->message << endl;
+     cout << "Recive from Group "<<mess->group_name<<"["<<mess->mess_type<<"]  ---- Message : " << mess->message << endl;
      reply.prepare_send(mess->group_name,mess->mess_type,mess->send_host_name,mess->message,mess->message_size);
      mess_handle->sendMessage(&reply);
  }
@@ -38,7 +38,7 @@ int main(void)
     int count = 0;
     int return_code =0;
     while(1){
-        cout << "---------- Message Constantly Recive Test ------------" << endl;
+
         EventMessage while_mess;
 
         while_mess.prepare_recive("admin","heart");
@@ -56,10 +56,14 @@ int main(void)
         //     cout <<"READ MESS TYPE : " <<while_mess.mess_type << std::endl;
         //     count++;
         // }
-        cout << "Message Count : " << handler.get_unprocessed_message_count("admin","heart") << endl;
-         handler.readMessage(& while_mess);
-         if( while_mess.message != nullptr)
-            cout << " Constantly  Message  : " <<(char *)while_mess.message << endl;
-        sleep(5);
+        if( handler.get_unprocessed_message_count("admin","heart") != 0)
+        {
+            cout << "---------- Message Constantly Recive Test ------------" << endl;
+            cout << "Message Count : " << handler.get_unprocessed_message_count("admin","heart") << endl;
+            handler.readMessage(& while_mess);
+            if( while_mess.message != nullptr)
+                cout << " Constantly  Message  : " <<while_mess.message_size  << endl;//(char *)while_mess.message << endl;
+        }
+       //sleep(5);
     }
 }
