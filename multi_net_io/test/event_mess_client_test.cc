@@ -26,6 +26,17 @@ int main(void)
 
     int count = 0;
     int return_code =0;
+
+    cout << "---------- Large Message Send Test ------------" << endl;
+     EventMessage mess;
+     string  mess_str = "";
+     for(int i=0; i<1024*1024;i++)
+     {
+         mess_str += "w";
+     }
+     mess.prepare_send("admin","heart","host2",mess_str.c_str(),mess_str.size());
+     handler.sendMessage(&mess);
+
     while(1){
         cout << "---------- Message Constantly Send Test ------------" << endl;
         EventMessage while_mess;

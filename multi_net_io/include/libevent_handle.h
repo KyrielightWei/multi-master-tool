@@ -32,7 +32,7 @@
 #include <atomic>
 #include <condition_variable>
 
-#define LIBEVENT_HANDLE_DEBUG 0
+#define LIBEVENT_HANDLE_DEBUG  0
 
 
  /** callback function  **/
@@ -42,6 +42,12 @@ void listen_error_cb(struct evconnlistener *, void *);
 void default_bufferevent_read_cb(struct bufferevent *bev, void *ctx);
 void default_bufferevent_write_cb(struct bufferevent *bev, void *ctx);
 
+/* Packet information */
+struct BufferControlBlock
+{
+    int size;
+};
+
 
 /*bufferevent  and connection information*/
 struct BevInfor
@@ -50,17 +56,14 @@ struct BevInfor
     int port;
     struct bufferevent * bev;
     bool is_listen;
+    BufferControlBlock  block;
+    bool cache_block;
     std::atomic<int> * read_singal_ptr;
     std::atomic<int> * write_singal_ptr;
     std::condition_variable * recive_cond_ptr;
     std::mutex * mut_ptr;
 };
 
-/* Packet information */
-struct BufferControlBlock
-{
-    int size;
-};
 
 class LibeventHandle:public NetworkHandle
 {
@@ -147,6 +150,8 @@ class LibeventHandle:public NetworkHandle
 
     int readBufferOnce(struct BevInfor &,char * data,int * data_size = 0);
     int readBufferOnce(struct BevInfor &,std::string & buffer_str);
+    int readBufferControlBlock_NoWait(struct BevInfor &);
+    int readBuffer_NoWait(struct BevInfor &, char *data);
     bool writeBufferOnce(struct BevInfor &,const char * data,const int data_size);
 
     struct event_base *main_base;

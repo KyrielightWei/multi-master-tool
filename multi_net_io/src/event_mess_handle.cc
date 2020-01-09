@@ -393,7 +393,7 @@ bool EventMessageHandle::check_mess_type(EventMessage * mess_ptr)
 {
    // std::cout << "STOP & "<<(int64_t)mess_ptr->mess_type << std::endl;
    #ifdef EVENT_MESS_HANDLE_DEBUG
-   std::cout << "Check Mess Type : " << "group name = "<<mess_ptr->group_name << " & " << "message type = " << mess_ptr->mess_type << std::endl;
+   //std::cout << "Check Mess Type : " << "group name = "<<mess_ptr->group_name << " & " << "message type = " << mess_ptr->mess_type << std::endl;
    #endif // DEBUG
     if(mess_group_map.find(mess_ptr->group_name) == mess_group_map.end())
     {
@@ -434,13 +434,18 @@ bool EventMessageHandle::read_callback_message_from_libevent(int connect_id,Libe
 {
     // read one message from libevent
     EventMessage mess;
-
+#ifdef EVENT_MESS_HANDLE_DEBUG
+   std::cout << "Recive String " << std::endl;
+#endif
     int recive_size = handle_ptr->recive_str(connect_id,mess.buffer_str,false); // run in callback function,not wait
-    mess.buffer_size = recive_size;
+#ifdef EVENT_MESS_HANDLE_DEBUG
+   std::cout << "Recive Size "<< recive_size << std::endl;
+#endif
     if(recive_size <= 0)
     {
         return false;
     }
+    mess.buffer_size = recive_size;
 #ifdef EVENT_MESS_HANDLE_DEBUG
     std::cout << "Recive Buffer : " << mess.buffer_str << std::endl;
     std::cout << "Recive Buffer SIZE : " << mess.buffer_str.size() << std::endl;
@@ -464,6 +469,6 @@ void libevent_callback(NET_EVENT event_id, NetworkHandle *handle, int connect_id
     //read message from libevent
     //get mess_type in message_type
     //call mess_handle->try_run_callback
-
+    //std::cout << "libevent callback in event message" << std::endl;
     mess_handle->read_callback_message_from_libevent(connect_id,event_handle);
 }

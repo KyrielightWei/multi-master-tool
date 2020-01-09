@@ -278,6 +278,7 @@ int LibeventHandle::recive_str(const int connect_id, std::string &buffer_str, bo
     {
         std::unique_lock<std::mutex> lk(*(info.mut_ptr));
         info.recive_cond_ptr->wait(lk, [=]() { return get_recive_buffer_length(connect_id) > sizeof(BufferControlBlock); });
+        return readBufferOnce(info, buffer_str);
     }
     else
     {
@@ -285,9 +286,14 @@ int LibeventHandle::recive_str(const int connect_id, std::string &buffer_str, bo
         {
             return 0;
         }
+        if(!info.cache_block)
+            readBufferControlBlock_NoWait(info);
+        if(buffer_str.length() <= info.block.size)
+            buffer_str.append(info.block.size,0);
+        return readBuffer_NoWait(info,(char *)buffer_str.c_str());
     }
  //std::cout << " STOP recive_str length ：" << get_recive_buffer_length(connect_id) << std::endl;
-    return readBufferOnce(info, buffer_str);
+
 }
 
 int LibeventHandle::get_recive_buffer_length(const int connect_id)
@@ -464,6 +470,72 @@ int LibeventHandle::readBufferOnce(struct BevInfor &info, std::string &buffer_st
     rw_w_unlock(*(info.read_singal_ptr));
 
     return read_size;
+}
+
+int LibeventHandle::readBufferControlBlock_NoWait(struct BevInfor & info )
+{
+    rw_w_lock(*(info.read_singal_ptr));
+
+    int read_size = 0;
+    info.cache_block = true;
+    memset(&info.block, 0, sizeof(BufferControlBlock));
+
+    char * block_buffer = (char *)&info.block;
+    read_size = bufferevent_read(info.bev,block_buffer , sizeof(BufferControlBlock));
+    if (read_size < 0)
+    {
+#if LIBEVENT_HANDLE_DEBUG
+        int err = EVUTIL_SOCKET_ERROR();
+        std::cout << "bufferevent_read error --- "
+                  << "[ERROR " << err << "] : " << evutil_socket_error_to_string(err) << std::endl;
+#endif // DEBUG
+        rw_w_unlock(*(info.read_singal_ptr));
+        return -1;
+    }
+    //int max_size = ((BufferControlBlock *)block)->size;
+     rw_w_unlock(*(info.read_singal_ptr));
+     return read_size;
+}
+
+int LibeventHandle::readBuffer_NoWait(struct BevInfor & info, char *data)
+{
+    if(!info.cache_block) return -1;
+    int max_size = info.block.size;
+    int read_size = 0;
+#if LIBEVENT_HANDLE_DEBUG
+    std::cout << "Buffer control block Size ===== " <<max_size << std::endl;
+#endif //
+    rw_r_lock(*(info.read_singal_ptr));
+    evbuffer *input = bufferevent_get_input(info.bev);
+    int len = evbuffer_get_length(input);
+    rw_r_unlock(*(info.read_singal_ptr));
+
+    if(len<max_size)
+    {
+        return 0;
+    }
+    else
+    {
+        info.cache_block = false;
+    }
+
+    rw_w_lock(*(info.read_singal_ptr));
+    while (read_size < max_size)
+    {
+        read_size += bufferevent_read(info.bev, data + read_size, max_size - read_size);
+        if (read_size < 0)
+        {
+#if LIBEVENT_HANDLE_DEBUG
+            int err = EVUTIL_SOCKET_ERROR();
+            std::cout << "bufferevent_read error --- "
+                      << "[ERROR " << err << "] : " << evutil_socket_error_to_string(err) << std::endl;
+#endif // DEBUG
+            rw_w_unlock(*(info.read_singal_ptr));
+            return -1;
+        }
+    }
+     rw_w_unlock(*(info.read_singal_ptr));
+     return read_size;
 }
 
 bool LibeventHandle::writeBufferOnce(struct BevInfor &info, const char *data, const int data_size)
@@ -675,7 +747,12 @@ void default_bufferevent_read_cb(struct bufferevent *bev, void *ctx)
     (lib->bev_map[id].recive_cond_ptr)->notify_all();
 
     if (lib->callback_funtion != NULL)
+    {
+#if LIBEVENT_HANDLE_DEBUG
+     std::cout << "Invoke libevent callback function "<< std::endl;
+#endif // DEBUG
         lib->callback_funtion(NET_EVENT::RECIVE, lib,id,lib->callback_args);
+    }
 }
 
 void default_bufferevent_write_cb(struct bufferevent *bev, void *ctx)
