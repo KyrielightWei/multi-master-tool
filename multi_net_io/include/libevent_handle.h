@@ -60,8 +60,6 @@ struct BevInfor
     bool cache_block;
     std::atomic<int> * read_singal_ptr;
     std::atomic<int> * write_singal_ptr;
-    std::condition_variable * recive_cond_ptr;
-    std::mutex * mut_ptr;
 };
 
 
@@ -79,9 +77,9 @@ class LibeventHandle:public NetworkHandle
     virtual bool free_handle();
 
     bool send(const int id,const char * send_bytes,const int send_size);
-    int wait_recive(const int id,char * recive_bytes,int * recive_size=0);
+    int wait_recive(const int id,char * recive_bytes,int sleep_interval=0);
 
-    int recive_str(const int id,std::string & buffer_str,bool wait);
+    int recive_str_NoWait(const int id,std::string & buffer_str);
 
     int get_recive_buffer_length(const int id);
     void set_event_callback(NetworkHandle_CB cb,void * arg)
@@ -139,7 +137,7 @@ class LibeventHandle:public NetworkHandle
     void start_event_base_loop();
 
     void set_connection_cb(int id,
-    bufferevent_data_cb readcb = default_bufferevent_read_cb , bufferevent_data_cb writecb = NULL,//default_bufferevent_write_cb,
+    bufferevent_data_cb readcb = default_bufferevent_read_cb , bufferevent_data_cb writecb = default_bufferevent_write_cb,//default_bufferevent_write_cb,
     bufferevent_event_cb eventcb = NULL , void *cbarg = NULL);
 
     int add_bufferevent_connect(const char* ip,const int port);
@@ -148,10 +146,10 @@ class LibeventHandle:public NetworkHandle
 
     int get_connection_id(struct bufferevent * bev);
 
-    int readBufferOnce(struct BevInfor &,char * data,int * data_size = 0);
-    int readBufferOnce(struct BevInfor &,std::string & buffer_str);
-    int readBufferControlBlock_NoWait(struct BevInfor &);
-    int readBuffer_NoWait(struct BevInfor &, char *data);
+    int readBufferControlBlock_Wait(struct BevInfor &,int sleep_interval);  // start -- lock
+    int readBuffer_Wait(struct BevInfor &, char *data,int sleep_interval);  // end -- unlock
+    int readBufferControlBlock_NoWait(struct BevInfor &);  // start -- lock
+    int readBuffer_NoWait(struct BevInfor &, char *data); // end -- unlock
     bool writeBufferOnce(struct BevInfor &,const char * data,const int data_size);
 
     struct event_base *main_base;

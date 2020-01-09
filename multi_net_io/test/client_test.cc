@@ -25,7 +25,7 @@ int main(int argc,char * argv[])
     cout << "Connect Port = " << port2 << std::endl;
 
 
-
+//10.11.6.120
 
     if(!lib.init_handle(port))
     {
@@ -41,14 +41,15 @@ int main(int argc,char * argv[])
         {
             mess_str += "w";
         }
-        int re = lib.send(id,mess_str.c_str(),1024*1024);
-        cout <<  "send return :"<< re << std::endl;
 
         lib.send(id,"HELLO",6);
 
         lib.send(id,"APPLE",6);
 
         lib.send(id,"WORLD",6);
+
+ int re = lib.send(id,mess_str.c_str(),1024*1024);
+        cout <<  "send return :"<< re << std::endl;
 
     }
 

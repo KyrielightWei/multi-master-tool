@@ -437,7 +437,7 @@ bool EventMessageHandle::read_callback_message_from_libevent(int connect_id,Libe
 #ifdef EVENT_MESS_HANDLE_DEBUG
    std::cout << "Recive String " << std::endl;
 #endif
-    int recive_size = handle_ptr->recive_str(connect_id,mess.buffer_str,false); // run in callback function,not wait
+    int recive_size = handle_ptr->recive_str_NoWait(connect_id,mess.buffer_str); // run in callback function,not wait
 #ifdef EVENT_MESS_HANDLE_DEBUG
    std::cout << "Recive Size "<< recive_size << std::endl;
 #endif

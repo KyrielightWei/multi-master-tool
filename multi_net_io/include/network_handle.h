@@ -31,7 +31,7 @@ class NetworkHandle
 
     virtual bool send(const int id,const char * send_bytes,const int send_size)=0;
 
-    virtual int wait_recive(const int id,char * recive_bytes,int * recive_size)=0;
+    virtual int wait_recive(const int id,char * recive_bytes,int sleep_interval)=0;
 
     virtual int get_recive_buffer_length(const int id)=0;
 
