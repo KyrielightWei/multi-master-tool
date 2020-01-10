@@ -52,3 +52,10 @@ fuzz-incremental/
 # cargo configuration. We presently use this to create custom cargo profiles
 # that should not be checked in at this location.
 .cargo/
+
+
+**/idea/
+**/cmake-build-debug/
+**/build/
+*.clion.source.upload.marker
+*nohup.out
