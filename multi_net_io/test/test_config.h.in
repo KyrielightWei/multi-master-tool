@@ -1,1 +1,0 @@
-#cmakedefine TEST_SOURCE_DIR "${TEST_SOURCE_DIR}"
