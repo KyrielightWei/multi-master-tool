@@ -39,17 +39,20 @@ int main(int argc,char * argv[])
     //lib.set_event_callback(callback,NULL);
 
     int listen_array[100];
-    char temp_buf[50];
+    char temp_buf[1024*1024];
     while(1)
     {
-        memset(temp_buf,0,sizeof(char)*50);
-        sleep(4);
-        cout << "listen count " << lib.get_listen_connection_count() << std::endl;
+        memset(temp_buf,0,sizeof(char)*1024*1024);
+        //sleep(1);
+       // cout << "listen count " << lib.get_listen_connection_count() << std::endl;
         lib.get_listen_connection_array(listen_array);
         int readsize = lib.wait_recive(listen_array[0],temp_buf);
+        if(readsize > 0)
+        {
         cout << "read size " << readsize << std::endl;
         cout << "recive buffer length " << lib.get_recive_buffer_length(listen_array[0])<< std::endl;
-        cout << temp_buf << std::endl;
+        }
+        //cout << temp_buf << std::endl;
     };
     return 0;
 }

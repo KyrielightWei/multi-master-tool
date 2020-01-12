@@ -10,3 +10,5 @@ IF(debug)
 ENDIF()
 
 add_subdirectory(multi_net_io)
+
+add_subdirectory(centralized-lock-table)

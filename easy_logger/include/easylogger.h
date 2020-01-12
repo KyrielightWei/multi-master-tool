@@ -33,6 +33,7 @@ class EasyLogger
             break;
         case LOG_LEVEL::debug:
             async_log->debug(s);
+            break;
         case LOG_LEVEL::warn:
             async_log->warn(s);
             break;
@@ -91,6 +92,9 @@ class EasyLogger
 
 #define EasyLoggerWithTrace(p,l)             \
         EasyLogger(__FILE__, __LINE__,p,l)
+
+#define EasyLoggerWithTrace_FLUSH(p,l)             \
+        EasyLogger(__FILE__, __LINE__,p,l,true)
 
 
 #endif // !EASY_LOGGER_HEADER

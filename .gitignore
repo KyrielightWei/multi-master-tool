@@ -1,6 +1,9 @@
 
 #ignare cmaek build
 build/
+GPATH
+GRTAGS
+GTAGS
 
 #ignore target
 target/
