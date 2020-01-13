@@ -32,7 +32,7 @@
 #include <atomic>
 #include <condition_variable>
 
-#define LIBEVENT_HANDLE_DEBUG  0
+#define LIBEVENT_HANDLE_DEBUG 1
 
 
  /** callback function  **/
