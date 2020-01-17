@@ -30,10 +30,10 @@
 
 #include <thread>
 #include <atomic>
-#include <condition_variable>
+//#include <condition_variable>
 
+#include <assert.h>
 #define LIBEVENT_HANDLE_DEBUG  0
-
 
  /** callback function  **/
 void connlistener_cb(struct evconnlistener * listener, evutil_socket_t fd, struct sockaddr * sock, int socklen, void * arg);
@@ -60,6 +60,7 @@ struct BevInfor
     bool cache_block;
     std::atomic<int> * read_singal_ptr;
     std::atomic<int> * write_singal_ptr;
+    std::atomic<bool> * send_finish_bool_ptr;
 };
 
 
@@ -76,7 +77,7 @@ class LibeventHandle:public NetworkHandle
 
     virtual bool free_handle();
 
-    bool send(const int id,const char * send_bytes,const int send_size);
+    int send(const int id,const char * send_bytes,const int send_size);
     int wait_recive(const int id,char * recive_bytes,int sleep_interval=0);
 
     int recive_str_Wait(const int id,std::string & buffer_str,int sleep_interval=0);
@@ -141,7 +142,7 @@ class LibeventHandle:public NetworkHandle
     void start_event_base_loop();
 
     void set_connection_cb(int id,
-    bufferevent_data_cb readcb = default_bufferevent_read_cb , bufferevent_data_cb writecb = default_bufferevent_write_cb,//default_bufferevent_write_cb,
+    bufferevent_data_cb readcb = default_bufferevent_read_cb , bufferevent_data_cb writecb = default_bufferevent_write_cb,
     bufferevent_event_cb eventcb = NULL , void *cbarg = NULL);
 
     int add_bufferevent_connect(const char* ip,const int port);
@@ -154,7 +155,7 @@ class LibeventHandle:public NetworkHandle
     int readBuffer_Wait(struct BevInfor &, char *data,int sleep_interval);  // end -- unlock
     int readBufferControlBlock_NoWait(struct BevInfor &);  // start -- lock
     int readBuffer_NoWait(struct BevInfor &, char *data); // end -- unlock
-    bool writeBufferOnce(struct BevInfor &,const char * data,const int data_size);
+    int writeBufferOnce(struct BevInfor &,const char * data,const int data_size);
 
     struct event_base *main_base;
     struct evconnlistener *conn_listener;

@@ -1,3 +1,11 @@
+/*
+ * @Author: wei
+ * @Date: 2020-01-15 15:15:38
+ * @LastEditors  : Do not edit
+ * @LastEditTime : 2020-01-16 20:08:58
+ * @Description: file content
+ * @FilePath: /multi_master/multi-master-tool/multi_net_io/test/event_mess_server_test.cc
+ */
 #include "event_mess_handle.h"
 #include "test_config.h"
 
@@ -29,41 +37,45 @@ int main(void)
      cout << "---------- Large Message Recive Test ------------" << endl;
      EventMessage mess;
      string  mess_str = "";
-     mess.prepare_recive("admin","heart");
-     mess.message = nullptr;
-     cout << "Large Message Count : " << handler.get_unprocessed_message_count("admin","heart") << endl;
-      handler.readMessage(&mess);
-     cout << "Large Message  : " <<(int64_t)mess.message << endl;
+
 
     int count = 0;
     int return_code =0;
     while(1){
 
-        EventMessage while_mess;
-
-        while_mess.prepare_recive("admin","heart");
-        while_mess.message = nullptr;
-        // return_code = handler.readMessage(&while_mess);
-        // cout << "readMessage return_code : " << return_code << endl;
-        // if(return_code <= 0)
-        // {
-        //      cout << "read error" << std::endl;
-        //      cout << MessageError::getEventErrorStr(while_mess.error_no) << endl;
-        // }
-        // else
-        // {
-        //     cout <<"READ RESULT : " <<while_mess.message << std::endl;
-        //     cout <<"READ MESS TYPE : " <<while_mess.mess_type << std::endl;
-        //     count++;
-        // }
-        if( handler.get_unprocessed_message_count("admin","heart") != 0)
+        mess.prepare_recive("admin","heart");
+        mess.message = nullptr;
+        if(handler.get_unprocessed_message_count("admin","heart") > 0)
         {
-            cout << "---------- Message Constantly Recive Test ------------" << endl;
-            cout << "Message Count : " << handler.get_unprocessed_message_count("admin","heart") << endl;
-            handler.readMessage(& while_mess);
-            if( while_mess.message != nullptr)
-                cout << " Constantly  Message  : " <<while_mess.message_size  << endl;//(char *)while_mess.message << endl;
+        //cout << "Large Message Count : " << handler.get_unprocessed_message_count("admin","heart") << endl;
+        handler.readMessage(&mess);
+        cout << "Large Message Sn : " << *((int *)(mess.message+1024*1000)) << endl;
         }
+        //EventMessage while_mess;
+
+        // while_mess.prepare_recive("admin","heart");
+        // while_mess.message = nullptr;
+        // // return_code = handler.readMessage(&while_mess);
+        // // cout << "readMessage return_code : " << return_code << endl;
+        // // if(return_code <= 0)
+        // // {
+        // //      cout << "read error" << std::endl;
+        // //      cout << MessageError::getEventErrorStr(while_mess.error_no) << endl;
+        // // }
+        // // else
+        // // {
+        // //     cout <<"READ RESULT : " <<while_mess.message << std::endl;
+        // //     cout <<"READ MESS TYPE : " <<while_mess.mess_type << std::endl;
+        // //     count++;
+        // // }
+        // if( handler.get_unprocessed_message_count("admin","heart") != 0)
+        // {
+        //     cout << "---------- Message Constantly Recive Test ------------" << endl;
+        //     cout << "Message Count : " << handler.get_unprocessed_message_count("admin","heart") << endl;
+        //     handler.readMessage(& while_mess);
+        //     if( while_mess.message != nullptr)
+        //         cout << " Constantly  Message  : " <<while_mess.message_size  << endl;//(char *)while_mess.message << endl;
+        // }
        //sleep(5);
     }
 }

@@ -1,3 +1,11 @@
+/*
+ * @Author: wei
+ * @Date: 2020-01-15 10:49:38
+ * @LastEditors  : Do not edit
+ * @LastEditTime : 2020-01-15 19:01:57
+ * @Description: file content
+ * @FilePath: multi-master-tool/multi_net_io/test/client_test.cc
+ */
 
 #include "network_handle.h"
 #include <iostream>
@@ -27,6 +35,8 @@ int main(int argc,char * argv[])
 
 //10.11.6.120
 
+    int id;
+    std::string mess_str = "";
     if(!lib.init_handle(port))
     {
         cout << "init error" << std::endl;
@@ -34,32 +44,31 @@ int main(int argc,char * argv[])
     if(port2 != 0)
     {
         cout << "send ---- " << std::endl;
-        int id = lib.get_connection_id("127.0.0.1",port2,true);
+        id = lib.get_connection_id("127.0.0.1",port2,true);
         cout <<  "connection id  :"<< id << std::endl;
-       std::string mess_str = "";
+     //  std::string mess_str = "";
         for (int i=0 ; i< 1024*1024;i++)
         {
             mess_str += "w";
         }
-
-         int re = lib.send(id,mess_str.c_str(),1024*1024);
 
         lib.send(id,"HELLO",6);
 
         lib.send(id,"APPLE",6);
 
         lib.send(id,"WORLD",6);
-
-
-        cout <<  "send return :"<< re << std::endl;
-
     }
 
     //LibeventHandle::event_loop_run(&lib);
     //int last_count =
-    while(1)
+    int count  = 0;
+    while(count <10000)
     {
-        // sleep(10);
+        bool re = lib.send(id,mess_str.c_str(),1024*1024);
+        cout <<  "send return :"<< re << std::endl;
+        cout << "------------------------ send count : " << count++ << endl;
+     //   if(!re)   break;
+      //  sleep(1);
         // cout <<  "connection_count return :"<< lib.get_connection_count() << std::endl;
         //       cout <<  "error :"<< errno << std::endl;
     };

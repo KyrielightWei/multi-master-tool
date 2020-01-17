@@ -1,3 +1,11 @@
+/*
+ * @Author: wei
+ * @Date: 2020-01-15 14:48:28
+ * @LastEditors  : Do not edit
+ * @LastEditTime : 2020-01-16 17:42:59
+ * @Description: file content
+ * @FilePath: multi-master-tool/multi_net_io/test/event_mess_client_test.cc
+ */
 #include "event_mess_handle.h"
 #include "test_config.h"
 
@@ -34,33 +42,50 @@ int main(void)
      {
          mess_str += "w";
      }
-     mess.prepare_send("admin","heart","host2",mess_str.c_str(),mess_str.size());
-     handler.sendMessage(&mess);
 int c = 0;
-    while(c<10){
-        cout << "---------- Message Constantly Send Test ------------" << endl;
-        EventMessage while_mess;
-        EventMessage reply_mess;
-        string while_str = "send count : " + std::to_string(count);
-        string reply_str = "try to get reply --- count : " + std::to_string(count);
-        while_mess.prepare_send("admin","heart","host2",while_str.c_str(),while_str.size());
-        reply_mess.prepare_send("admin","reply","host2",reply_str.c_str(),reply_str.size());
-        return_code = handler.sendMessage(&while_mess);
-        handler.sendMessage(&reply_mess);
-        cout << "sendMessage return_code : " << return_code << endl;
+    while(c<10000){
+        int * i_ptr = (int *)(mess_str.c_str()+1024*1000);
+        memcpy(i_ptr, &c,sizeof(int));
+        mess.prepare_send("admin","heart","host2",mess_str.c_str(),mess_str.size());
+        return_code = handler.sendMessage(&mess);
         if(return_code < 0)
         {
-             cout << "send error" << std::endl;
-             cout << MessageError::getEventErrorStr(while_mess.error_no) << endl;
+            cout << "Error Client Test [" << c << "]" << endl;
+            cout << "send error" << std::endl;
+            cout << MessageError::getEventErrorStr(mess.error_no) << endl;
+        }
+        else if(return_code == 0)
+        {
+            sleep(1);
+            cout << "Try again Test [ "<< c << " ] "<< endl;
+            c--;
         }
         else
         {
-            cout << while_mess.message << std::endl;
-            count++;
+            cout << "Client Test [ "<< c << "]"<< std::endl;
         }
-c++;
-cout << "client Test [ "<< c << "]"<< std::endl;
+        // cout << "---------- Message Constantly Send Test ------------" << endl;
+        // EventMessage while_mess;
+        // EventMessage reply_mess;
+        // string while_str = "send count : " + std::to_string(count);
+        // string reply_str = "try to get reply --- count : " + std::to_string(count);
+        // while_mess.prepare_send("admin","heart","host2",while_str.c_str(),while_str.size());
+        // reply_mess.prepare_send("admin","reply","host2",reply_str.c_str(),reply_str.size());
+        // return_code = handler.sendMessage(&while_mess);
+        // handler.sendMessage(&reply_mess);
+        // cout << "sendMessage return_code : " << return_code << endl;
+        // if(return_code < 0)
+        // {
+        //      cout << "send error" << std::endl;
+        //      cout << MessageError::getEventErrorStr(while_mess.error_no) << endl;
+        // }
+        // else
+        // {
+        //     cout << while_mess.message << std::endl;
+        //     count++;
+        // }
         //sleep(5);
+c++;
     }
     while(1);
     //handler.free_handle();

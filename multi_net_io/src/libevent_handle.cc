@@ -126,6 +126,7 @@ int LibeventHandle::add_bufferevent_connect(const char *ip, const int port)
     peer.is_listen = false;
     peer.read_singal_ptr = new std::atomic<int>{0};
     peer.write_singal_ptr = new std::atomic<int>{0};
+    peer.send_finish_bool_ptr = new std::atomic<bool>{true};
 
     int peer_id = max_bev_id.load();
     max_bev_id.fetch_add(1);
@@ -151,6 +152,7 @@ int LibeventHandle::add_bufferevent_listen(const char *ip, const int port, int s
     peer.is_listen = true;
     peer.read_singal_ptr = new std::atomic<int>{0};
     peer.write_singal_ptr = new std::atomic<int>{0};
+    peer.send_finish_bool_ptr = new std::atomic<bool>{true};
 
     int peer_id = max_bev_id.load();
     max_bev_id.fetch_add(1);
@@ -218,9 +220,8 @@ void LibeventHandle::start_event_base_loop()
 #endif
 }
 
-bool LibeventHandle::send(const int connect_id, const char *send_bytes, const int send_size)
+int LibeventHandle::send(const int connect_id, const char *send_bytes, const int send_size)
 {
-
     if (connect_id < 0)
     {
 #if LIBEVENT_HANDLE_DEBUG
@@ -235,9 +236,7 @@ bool LibeventHandle::send(const int connect_id, const char *send_bytes, const in
     struct BevInfor &info = bev_map[connect_id];
     rw_r_unlock(bev_map_rw_lock_singal);
 
-    writeBufferOnce(info, send_bytes, send_size);
-    //std::cout << "STOP!!!" <<std::endl;
-    return true;
+    return writeBufferOnce(info, send_bytes, send_size);
 }
 
 int LibeventHandle::wait_recive(const int connect_id, char *recive_bytes,int sleep_interval)
@@ -393,11 +392,16 @@ int LibeventHandle::readBuffer_Wait(struct BevInfor & info, char *data,int sleep
 #endif //
    // rw_w_lock(*(info.read_singal_ptr));
     int len = 0;
+    int count = 0;
     evbuffer *input = bufferevent_get_input(info.bev);
     do
     {
 #if LIBEVENT_HANDLE_DEBUG
+    if(count > 100)
+    {
+        count++;
         std::cout << "============ wait recive evbuffer len :" <<len << std::endl;
+    }
 #endif // DEBUG
         sleep(sleep_interval);
         len = evbuffer_get_length(input);
@@ -472,7 +476,7 @@ int LibeventHandle::readBuffer_NoWait(struct BevInfor & info, char *data)
          #endif //
         rw_w_unlock(*(info.read_singal_ptr));
        // std::cout << "============ NoWait !!!" <<len << std::endl;
-       bufferevent_setwatermark(info.bev, EV_READ ,max_size, 0);
+        bufferevent_setwatermark(info.bev, EV_READ ,max_size, 0);
 
         return 0;
     }
@@ -496,36 +500,75 @@ int LibeventHandle::readBuffer_NoWait(struct BevInfor & info, char *data)
     return read_size;
 }
 
-bool LibeventHandle::writeBufferOnce(struct BevInfor &info, const char *data, const int data_size)
+int LibeventHandle::writeBufferOnce(struct BevInfor &info, const char *data, const int data_size)
 {
     rw_w_lock(*(info.write_singal_ptr));
-
+    evbuffer * output = NULL;
+    int len = 0;
+   //evbuffer_drain(output,0);
     struct BufferControlBlock block;
     block.size = data_size;
-
+//std::cout << "STOP 1!!!" <<std::endl;
     if (bufferevent_write(info.bev, &block, sizeof(block)) < 0)
     {
 #if LIBEVENT_HANDLE_DEBUG
         int err = EVUTIL_SOCKET_ERROR();
-        std::cout << "bufferevent_write error --- "
+        std::cout << "control block bufferevent_write error --- "
                   << "[ERROR " << err << "] : " << evutil_socket_error_to_string(err) << std::endl;
 #endif // DEBUG
         rw_w_unlock(*(info.write_singal_ptr));
-        return false;
+        return -1;
     }
-//std::cout << "STOP!!!" <<std::endl;
+//std::cout << "STOP 2!!! " << data_size <<std::endl;
+//bool e = false;
     if (bufferevent_write(info.bev, data, data_size) < 0)
     {
-#if LIBEVENT_HANDLE_DEBUG
         int err = EVUTIL_SOCKET_ERROR();
-        std::cout << "bufferevent_write error --- "
+#if LIBEVENT_HANDLE_DEBUG
+        std::cout << "data packet bufferevent_write error --- "
                   << "[ERROR " << err << "] : " << evutil_socket_error_to_string(err) << std::endl;
 #endif // DEBUG
         rw_w_unlock(*(info.write_singal_ptr));
-        return false;
+        if(err != EINPROGRESS)
+        {
+          //  std::cout << "*************** EINPROGRESS"<< std::endl;
+           // assert(false);
+            return 0;
+        }
+        else
+        {
+             //sleep(1);
+            return -1;
+            // std::cout << "*************** EINPROGRESS count : " <<wr_c << std::endl;
+             //goto data_packet;
+        }
     }
+    info.send_finish_bool_ptr->store(false);
+    int last_len = 0;
+    int same_count = 0;
+    output = bufferevent_get_output(info.bev);
+    do
+    {
+        len = evbuffer_get_length(output);
+        if(last_len != len)
+        {
+            std::cout << " Wait Write Buffer Length : " << len << std::endl;
+            same_count = 0;
+        }
+        else
+        {
+            if(same_count++ > 100)
+            {
+                //sleep(1);
+                usleep(1000);
+            }
+        }
+        last_len = len;
+    }
+    while(info.send_finish_bool_ptr->load() == false);
+//std::cout << "STOP 3!!!" <<std::endl;
     rw_w_unlock(*(info.write_singal_ptr));
-    return true;
+    return 1;
 }
 
 int LibeventHandle::get_connection_id(const char *ip, const int port, bool tryConnect)
@@ -697,11 +740,11 @@ void default_bufferevent_read_cb(struct bufferevent *bev, void *ctx)
 #if LIBEVENT_HANDLE_DEBUG
     std::cout << "In callback : recive from " << lib->bev_map[id].ip << " : " << lib->bev_map[id].port << std::endl;
     evbuffer *buf = bufferevent_get_input(bev);
-    std::cout << "evbuffer space : " << evbuffer_get_contiguous_space(buf) << std::endl;
-    std::cout << "evbuffer  1 length : " << evbuffer_get_length(buf) << std::endl;
+    //std::cout << "evbuffer space : " << evbuffer_get_contiguous_space(buf) << std::endl;
+    std::cout << "recive evbuffer length : " << evbuffer_get_length(buf) << std::endl;
 #endif // DEBUG
 
-   // std::lock_guard<std::mutex> lk(*(lib->bev_map[id].mut_ptr));
+   //std::lock_guard<std::mutex> lk(*(lib->bev_map[id].mut_ptr));
     //(lib->bev_map[id].recive_cond_ptr)->notify_all();
 
     if (lib->callback_funtion != NULL)
@@ -715,11 +758,25 @@ void default_bufferevent_read_cb(struct bufferevent *bev, void *ctx)
 
 void default_bufferevent_write_cb(struct bufferevent *bev, void *ctx)
 {
-#if LIBEVENT_HANDLE_DEBUG
-    // std::cout << "write into evbuffer" << std::endl;
-    // evbuffer *buf = bufferevent_get_output(bev);
-    // std::cout << "evbuffer length : " << evbuffer_get_length(buf) << std::endl;
-#endif // DEBUG
+//#if LIBEVENT_HANDLE_DEBUG
+    std::cout << "In callback : write into " << std::endl;
+    evbuffer *buf = bufferevent_get_output(bev);
+    std::cout << "write evbuffer length : " << evbuffer_get_length(buf) << std::endl;
 
+    LibeventHandle *lib = (LibeventHandle *)ctx;
+    int id = lib->get_connection_id(bev);
+
+    if(evbuffer_get_length(buf) == 0)
+    {
+        BevInfor & info = lib->bev_map[id];
+        info.send_finish_bool_ptr->store(true);
+    }
+    // int count = 0;
+    // while(evbuffer_get_length(buf) > 0)
+    // {
+    //     if(count++ < 10)
+    //         std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++  buffer is not empty --- "<< count << std::endl;
+    // }
+//#endif // DEBUG
    // LibeventHandle *lib = (LibeventHandle *)ctx;
 }

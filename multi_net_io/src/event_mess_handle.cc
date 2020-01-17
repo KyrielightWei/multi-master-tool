@@ -13,6 +13,7 @@ const char *MessageError::EVENT_ERROR_STRING[] = {
     "No outstanding messages",
     "Invalid host",
     "None requested messages"
+    "Error In Libevent Send Function"
 };
 
 /***********************************
@@ -254,14 +255,20 @@ int EventMessageHandle::sendMessage(EventMessage *mess_ptr)
 
     int connect_id = event_handle.get_connection_id(ip,port,true);
 
-    bool return_bool = event_handle.send(connect_id,mess_ptr->buffer_str.c_str(),mess_ptr->buffer_size);
+    int return_code = event_handle.send(connect_id,mess_ptr->buffer_str.c_str(),mess_ptr->buffer_size);
 
 #ifdef EVENT_MESS_HANDLE_DEBUG
-    std::cout << "Libevent Send Return "<< return_bool << std::endl;
-    std::cout << "Send Buffer : "<< mess_ptr->buffer_str << std::endl;
+    std::cout << "Libevent Send Return "<< return_code << std::endl;
+    //std::cout << "Send Buffer : "<< mess_ptr->buffer_str << std::endl;
     std::cout << "Send Size : "<< mess_ptr->buffer_str.size() << std::endl;
 #endif // DEBUG
-    return 1;
+    if(return_code >= 0)
+        return return_code;
+    else
+    {
+        mess_ptr->error_no = MessageError::EventMessageErrorNo::LIBEVENT_SEND_ERROR;
+        return -1;
+    }
 }
 
 void EventMessageHandle::read_config(const char *host_config_path, const char *mess_config_path)
@@ -392,20 +399,25 @@ LibeventHandle *EventMessageHandle::get_libeventhandle(const char *group_name)
 bool EventMessageHandle::check_mess_type(EventMessage * mess_ptr)
 {
    // std::cout << "STOP & "<<(int64_t)mess_ptr->mess_type << std::endl;
-   #ifdef EVENT_MESS_HANDLE_DEBUG
-   //std::cout << "Check Mess Type : " << "group name = "<<mess_ptr->group_name << " & " << "message type = " << mess_ptr->mess_type << std::endl;
-   #endif // DEBUG
+   //#ifdef EVENT_MESS_HANDLE_DEBUG
+//   std::cout << "Check Mess Type : " << "group name = "<<(int64_t)mess_ptr->group_name << " & " << "message type = " << (int64_t)mess_ptr->mess_type << std::endl;
+   //#endif // DEBUG
     if(mess_group_map.find(mess_ptr->group_name) == mess_group_map.end())
     {
         mess_ptr->error_no =  MessageError::EventMessageErrorNo::GROUP_NOT_FOUND;
         return false;
     }
+    //std::cout  << "Stop 1" << std::endl;
     auto & mess_type_map = mess_group_map[mess_ptr->group_name]->mess_callback_map;
+
+//    std::cout  << "Stop 2" << std::endl;
     if(mess_type_map.find(mess_ptr->mess_type) == mess_type_map.end())
     {
         mess_ptr->error_no =  MessageError::EventMessageErrorNo::MESS_TYPE_NOT_FOUND;
         return false;
     }
+
+//    std::cout  << "Stop 3" << std::endl;
     return true;
 }
 
@@ -439,24 +451,27 @@ bool EventMessageHandle::read_callback_message_from_libevent(int connect_id,Libe
         // read one message from libevent
         EventMessage mess;
         #ifdef EVENT_MESS_HANDLE_DEBUG
-        std::cout << "Recive String " << std::endl;
+      //  std::cout << "Recive String " << std::endl;
         #endif
         recive_size = handle_ptr->recive_str_NoWait(connect_id,mess.buffer_str); // run in callback function,not wait
         #ifdef EVENT_MESS_HANDLE_DEBUG
-        std::cout << "Recive Size "<< recive_size << std::endl;
+        //std::cout << "Recive Size "<< recive_size << std::endl;
         #endif
-        std::cout << "Recive Size "<< recive_size << std::endl;
+        // std::cout << "Recive Size "<< recive_size << " ; Recive Buffer length : "<< handle_ptr->get_recive_buffer_length(connect_id)  << std::endl;
         if(recive_size <= 0)
         {
             return false;
         }
         mess.buffer_size = recive_size;
         #ifdef EVENT_MESS_HANDLE_DEBUG
-        std::cout << "Recive Buffer : " << mess.buffer_str << std::endl;
+      //  std::cout << "Recive Buffer : " << mess.buffer_str << std::endl;
         std::cout << "Recive Buffer SIZE : " << mess.buffer_str.size() << std::endl;
         #endif // DEBUG
 
         mess.init_message_ptr();
+
+       std::cout << "Check Mess Type : " << "group name = "<< *mess.group_name  << " @ "<< (int64_t)mess.group_name;
+        std::cout << " & " << "message type = " << *mess.mess_type << " @ " << (int64_t)mess.mess_type << std::endl;
 
         // try run some callback
         if(!try_run_callback(&mess))

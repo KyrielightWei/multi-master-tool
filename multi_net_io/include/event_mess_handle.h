@@ -33,7 +33,8 @@ namespace MessageError
         MESS_TYPE_NOT_FOUND = 3,
         NONE_UNPROCESSED_MESSAGE=4,
         INVALID_HOST=5,
-        NONE_REQUESTED_MESSAGE=6
+        NONE_REQUESTED_MESSAGE=6,
+        LIBEVENT_SEND_ERROR = 7,
     };
 
     const char *getEventErrorStr(EventMessageErrorNo no);

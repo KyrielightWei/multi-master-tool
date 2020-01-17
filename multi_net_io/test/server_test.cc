@@ -1,3 +1,11 @@
+/*
+ * @Author: wei
+ * @Date: 2020-01-15 11:21:19
+ * @LastEditors  : Do not edit
+ * @LastEditTime : 2020-01-15 11:46:15
+ * @Description: file content
+ * @FilePath: /multi_master/multi-master-tool/multi_net_io/test/server_test.cc
+ */
 
 #include "network_handle.h"
 #include <iostream>
@@ -40,10 +48,11 @@ int main(int argc,char * argv[])
 
     int listen_array[100];
     char temp_buf[1024*1024];
+    int count = 0;
     while(1)
     {
         memset(temp_buf,0,sizeof(char)*1024*1024);
-        //sleep(1);
+        //sleep(2);
        // cout << "listen count " << lib.get_listen_connection_count() << std::endl;
         lib.get_listen_connection_array(listen_array);
         int readsize = lib.wait_recive(listen_array[0],temp_buf);
@@ -51,6 +60,7 @@ int main(int argc,char * argv[])
         {
         cout << "read size " << readsize << std::endl;
         cout << "recive buffer length " << lib.get_recive_buffer_length(listen_array[0])<< std::endl;
+        cout << "------------------------ recive count :" << count++ << std::endl;
         }
         //cout << temp_buf << std::endl;
     };

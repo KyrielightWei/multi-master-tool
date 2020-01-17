@@ -1,3 +1,11 @@
+/*
+ * @Author: wei
+ * @Date: 2020-01-16 17:08:33
+ * @LastEditors: Do not edit
+ * @LastEditTime: 2020-01-16 17:08:33
+ * @Description: file content
+ * @FilePath: /multi_master/multi-master-tool/multi_net_io/include/network_handle.h
+ */
 /***
  * Common Network transmission handle
  * Basic Class
@@ -29,7 +37,7 @@ class NetworkHandle
     virtual int get_connection_id()=0;
     virtual int get_connection_count()=0;
 
-    virtual bool send(const int id,const char * send_bytes,const int send_size)=0;
+    virtual int send(const int id,const char * send_bytes,const int send_size)=0;
 
     virtual int wait_recive(const int id,char * recive_bytes,int sleep_interval)=0;
 

@@ -3,8 +3,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 IF(debug)
     message(STATUS " Libevent DEBUG!!!!!")
-    SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g2 -ggdb")
-    SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+
     ADD_SUBDIRECTORY(libevent)
     include_directories(${CMAKE_BINARY_DIR}/multi_net_io/libevent/include)
     include_directories(libevent/include)
