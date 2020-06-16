@@ -1,5 +1,6 @@
 
 #ignare cmaek build
+easy_logger/build
 build/
 GPATH
 GRTAGS
