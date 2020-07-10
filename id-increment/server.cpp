@@ -4,7 +4,7 @@
  * @LastEditors: Do not edit
  * @LastEditTime: 
  * @Description: file content
- * @FilePath: 
+ * @FilePath: /home/liuwenxin/multi-master-tool/id-increment/server.cpp
  */
 
 
@@ -17,13 +17,9 @@
 #include <ctime>
 using namespace std;
 
-// DEFINE_bool(echo_attachment, true, "Echo attachment as well");
 DEFINE_int32(port, 60006, "TCP Port of this server");
 DEFINE_int32(idle_timeout_s, -1, "Connection will be closed if there is no read/write operations during the last `idle_timeout_s'");
 long long id=1;
-// DEFINE_int32(logoff_ms, 2000, "Maximum duration of server's LOGOFF state "
-//              "(waiting for client to close connection before server stops)");
-
 
 // implementation of IDIncre::IDService
 class IDIncreImpl : public IDIncrement::IDService {
@@ -37,20 +33,14 @@ public:
         brpc::Controller* cntl = static_cast<brpc::Controller*>(cntl_base);
 
         //time
-
         time_t now = time(0);
         char* dt = ctime(&now);
         
-        cout<<"Received request[log_id="<<cntl->log_id()<<"] from " << cntl->remote_side() << " to " << cntl->local_side()<< ": " << request->message()<<" ,time:"<<dt<<endl;
+        cout<<"Received request[log_id="<<cntl->log_id()<<"] from " << cntl->remote_side() << " to " << cntl->local_side()<< ": " << request->message()<<" ,allot id: "<<id<<" ,time:"<<dt<<endl;
         
         // Fill response.
         response->set_message(to_string(id));
         id++;
-    // cout<<response->message()<<endl;
-        // if (FLAGS_echo_attachment) {
-        //     // Set attachment which is wired to network directly instead of being serialized into protobuf messages.
-        //     cntl->response_attachment().append(cntl->request_attachment());
-        // }
     }
 };
 

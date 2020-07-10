@@ -4,7 +4,7 @@
  * @LastEditors: Do not edit
  * @LastEditTime: 
  * @Description: file content
- * @FilePath: 
+ * @FilePath: /home/liuwenxin/multi-master-tool/id-increment/client.cpp
  */
 
 #include <gflags/gflags.h>
@@ -14,7 +14,6 @@
 #include <iostream>
 using namespace std;
 
-// DEFINE_string(attachment, "", "Carry this along with requests");
 DEFINE_string(protocol, "baidu_std", "Protocol type. Defined in src/brpc/options.proto");
 DEFINE_string(connection_type, "", "Connection type. Available values: single, pooled, short");
 DEFINE_string(server, "10.11.6.120:60006", "IP Address of server");
@@ -34,8 +33,7 @@ int main(int argc, char* argv[]) {
     string log_path="./id_client.log";
     log_setting.log_file=log_path.c_str();
     logging::InitLogging(log_setting);
-    // A Channel represents a communication line to a Server. Notice that 
-    // Channel is thread-safe and can be shared by all threads in your program.
+    // A Channel represents a communication line to a Server. Notice that Channel is thread-safe and can be shared by all threads in your program.
     brpc::Channel channel;
 
     // Initialize the channel, NULL means using default options.
@@ -49,31 +47,21 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    // Normally, you should not call a Channel directly, but instead construct
-    // a stub Service wrapping it. stub can be shared by all threads as well.
+    // Normally, you should not call a Channel directly, but instead construct a stub Service wrapping it. stub can be shared by all threads as well.
     IDIncrement::IDService_Stub stub(&channel);
 
-    // Send a request and wait for the response every 1 second.
+    // Send a request 
     int log_id = 0;
     while (!brpc::IsAskedToQuit()) {
-        // We will receive response synchronously, safe to put variables
-        // on stack.
+        // We will receive response synchronously, safe to put variables on stack.
         IDIncrement::IDRequest request;
         IDIncrement::IDResponse response;
         brpc::Controller cntl;
 
         request.set_message("request id");
-/*!!!!!!!!!!!
-cntl.set_timeout_ms(...);
-stub.some_method(&cntl, &request, &response, NULL);
-*/
         cntl.set_log_id(log_id ++);  // set by user
-        // Set attachment which is wired to network directly instead of 
-        // being serialized into protobuf messages.
-        // cntl.request_attachment().append(FLAGS_attachment);
 
-        // Because `done'(last parameter) is NULL, this function waits until
-        // the response comes back or error occurs(including timedout).
+        // Because `done'(last parameter) is NULL, this function waits until the response comes back or error occurs(including timedout).
         stub.IDInc(&cntl, &request, &response, NULL);
         if (!cntl.Failed()) {
             cout<<"Recive:"<<response.message()<<endl;
