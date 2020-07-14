@@ -2,7 +2,7 @@
  * @Author: liu
  * @Date: 2020-07-09 09:30
  * @LastEditors: Do not edit
- * @LastEditTime: 
+ * @LastEditTime: 2020-07-12 16:30
  * @Description: file content
  * @FilePath: /multi-master-tool/id-increment/client.cpp
  */
@@ -21,6 +21,21 @@ DEFINE_string(load_balancer, "", "The algorithm for load balancing");
 DEFINE_int32(timeout_ms, 1000, "RPC timeout in milliseconds");
 DEFINE_int32(max_retry, 5, "Max retries(not including the first RPC)"); 
 DEFINE_int32(interval_ms, 1000, "Milliseconds between consecutive requests");
+
+void HandleIDcreResponse(brpc::Controller* cntl,IDIncrement::IDResponse* response)
+{
+    // std::unique_ptr makes sure cntl/response will be deleted before returning.
+    unique_ptr<brpc::Controller> cntl_guard(cntl);
+    unique_ptr<IDIncrement::IDResponse> response_guard(response);
+    
+    if (cntl->Failed()) {
+        cout << "Fail to send EchoRequest, " << cntl->ErrorText()<<endl;
+        return;
+    }
+    cout<<"Received id : "<<response->message()<<endl;
+    // brpc::AskToQuit();
+}
+
 
 int main(int argc, char* argv[]) {
 
@@ -55,19 +70,18 @@ int main(int argc, char* argv[]) {
     while (!brpc::IsAskedToQuit()) {
         // We will receive response synchronously, safe to put variables on stack.
         IDIncrement::IDRequest request;
-        IDIncrement::IDResponse response;
-        brpc::Controller cntl;
+        // IDIncrement::IDResponse response;
+        IDIncrement::IDResponse* response=new IDIncrement::IDResponse();
+        brpc::Controller* cntl = new brpc::Controller();
+        // brpc::Controller cntl;
 
         request.set_message("request id");
-        cntl.set_log_id(log_id ++);  // set by user
+        cntl->set_log_id(log_id ++);  // set by user
 
-        // Because `done'(last parameter) is NULL, this function waits until the response comes back or error occurs(including timedout).
-        stub.IDInc(&cntl, &request, &response, NULL);
-        if (!cntl.Failed()) {
-            cout<<"Recive:"<<response.message()<<endl;
-        } else {
-            cout<<"Client Fail"<<endl;
-        }
+        //callback
+        google::protobuf::Closure* done = brpc::NewCallback(&HandleIDcreResponse,cntl,response);
+        stub.IDInc(cntl, &request, response, done);
+
         usleep(FLAGS_interval_ms * 1000L);
     }
 
