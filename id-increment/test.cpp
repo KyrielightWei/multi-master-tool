@@ -1,4 +1,11 @@
-
+/*
+ * @Author: liu
+ * @Date: 2020-07-14 09:30
+ * @LastEditors: Do not edit
+ * @LastEditTime: 
+ * @Description: file content
+ * @FilePath: /multi-master-tool/id-increment/test.cpp
+ */
 #include <iostream>
 #include <pthread.h>
 #include <unistd.h>
