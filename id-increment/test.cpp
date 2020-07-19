@@ -15,7 +15,7 @@ using namespace std;
 
 void* run_client(void* args)
 {
-    system("/home/liuwenxin/multi-master-tool/id-increment/build/client --interval_ms=100");
+    system("./build/client --interval_ms=0");
     return 0;
 }
  

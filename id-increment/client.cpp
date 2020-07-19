@@ -12,13 +12,14 @@
 #include <brpc/channel.h>
 #include "id.pb.h"
 #include <iostream>
+#include <ctime>
 using namespace std;
 
 DEFINE_string(protocol, "baidu_std", "Protocol type. Defined in src/brpc/options.proto");
 DEFINE_string(connection_type, "", "Connection type. Available values: single, pooled, short");
-DEFINE_string(server, "10.11.6.120:60006", "IP Address of server");
+DEFINE_string(server, "10.11.6.116:60006", "IP Address of server");
 DEFINE_string(load_balancer, "", "The algorithm for load balancing");
-DEFINE_int32(timeout_ms, 1000, "RPC timeout in milliseconds");
+DEFINE_int32(timeout_ms, 900000000, "RPC timeout in milliseconds");
 DEFINE_int32(max_retry, 5, "Max retries(not including the first RPC)"); 
 DEFINE_int32(interval_ms, 1000, "Milliseconds between consecutive requests");
 
@@ -67,7 +68,8 @@ int main(int argc, char* argv[]) {
 
     // Send a request 
     int log_id = 0;
-    while (!brpc::IsAskedToQuit()) {
+    // while (!brpc::IsAskedToQuit()) {
+    for(int i=0;i<1000;i++){
         // We will receive response synchronously, safe to put variables on stack.
         IDIncrement::IDRequest request;
         // IDIncrement::IDResponse response;
@@ -84,7 +86,7 @@ int main(int argc, char* argv[]) {
 
         usleep(FLAGS_interval_ms * 1000L);
     }
-
+    sleep(120);
     cout<<"Client is going to quit"<<endl;
     return 0;
 }

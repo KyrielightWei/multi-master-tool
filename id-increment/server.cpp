@@ -16,13 +16,15 @@
 #include <string>
 #include <ctime>
 #include <map>
+#include <mutex>
 using namespace std;
 
 DEFINE_int32(port, 60006, "TCP Port of this server");
 DEFINE_int32(idle_timeout_s, -1, "Connection will be closed if there is no read/write operations during the last `idle_timeout_s'");
 long long id=1;
 map<long long,string> idmap;
-
+mutex id_lock;
+int num=0;
 // implementation of IDIncre::IDService
 class IDIncreImpl : public IDIncrement::IDService {
 public:
@@ -33,7 +35,10 @@ public:
         brpc::ClosureGuard done_guard(done);
 
         brpc::Controller* cntl = static_cast<brpc::Controller*>(cntl_base);
-
+        //lock id
+        lock_guard<mutex> guard(id_lock);
+        num++;
+        // sleep(1);
         //time
         time_t now = time(0);
         char* dt = ctime(&now);
@@ -81,6 +86,7 @@ int main(int argc, char* argv[]) {
 
     // Wait until Ctrl-C is pressed, then Stop() and Join() the server.
     server.RunUntilAskedToQuit();
+    cout<<num<<endl;
     freopen("map.out","w",stdout);
     map<long long,string>::iterator it;
     for(it=idmap.begin();it!=idmap.end();it++)
