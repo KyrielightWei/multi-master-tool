@@ -15,13 +15,14 @@
 #include <time.h> 
 #include <queue>
 #include <utility>
+#include <thread>
 
 client_server c_s;
 RemoteLockTable re;
 
 void run_server_in_client()
 {
-     c_s.run();
+    c_s.run();
 }
 
 void client_test()
@@ -30,17 +31,17 @@ void client_test()
     PageID page_id ;
     std::string request_type ;
 
-    while(std::cin>>table_id>>page_id>>request_type)
-    // for(int i=0;i<100;i++)
+    // while(std::cin>>table_id>>page_id>>request_type)
+    for(int i=0;i<10000;i++)
     {   
-        // std::queue<std::pair<int,int>> pp;
-        // std::pair<int,int> pirtmp;
-        // int tt;std::string ss;
-        // table_id=rand() % 20;
-        // page_id=rand() % 10;
+        std::queue<std::pair<int,int>> pp;
+        std::pair<int,int> pirtmp;
+        int tt;std::string ss;
+        table_id=rand() % 20;
+        page_id=rand() % 10;
         // tt=rand() % 3;
         // if(tt==0) {
-        //     request_type="read";
+            request_type="read";
         //     pirtmp=std::make_pair(table_id,page_id);
         //     pp.push(pirtmp);
         // }
@@ -62,7 +63,7 @@ void client_test()
     }
 }
 
-int main()
+int main(int argc, char ** argv)
 {
     std::cout<<"cin port ";
     int portt;

@@ -22,6 +22,9 @@
 #include <thread>
 //debug
 #include <fstream>
+std::mutex debug_lock;
+int debug_num=0;
+
 //server which handle lock table (in server-side)
 
 void back_to_client(std::string addr,std::string c_c_addr,std::string table_page,int type)
@@ -120,7 +123,7 @@ void LOCKTableImpl::LOCKTable(google::protobuf::RpcController* cntl_base, const 
 
 //****************debug
     std::ofstream ofs;
-    ofs.open("./map.txt",std::ios::app);
+    ofs.open("./map.txt",std::ios::app);/*
     std::map<std::string,int>::iterator mapit;
     std::map<std::string,std::set<std::string>>::iterator clientit;
     std::set<std::string> cliset;
@@ -143,7 +146,11 @@ void LOCKTableImpl::LOCKTable(google::protobuf::RpcController* cntl_base, const 
         }
         ofs<<std::endl;
     }
-    ofs<<"---------------"<<std::endl;
+    ofs<<"---------------"<<std::endl;*/
+    debug_lock.lock();
+    debug_num++;
+    ofs<<"sum request= "<<debug_num;
+    debug_lock.unlock();
     ofs.close();
 }
 
