@@ -11,7 +11,7 @@
 #include <unistd.h>
  
 using namespace std; 
-#define NUM_THREADS 64
+#define NUM_THREADS 164
 
 void* run_client(void* args)
 {

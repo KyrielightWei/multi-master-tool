@@ -1,0 +1,59 @@
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/liuwenxin/multi-master-tool/lock_table/bu/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_3f3ae/fast && /usr/bin/gmake -f CMakeFiles/cmTC_3f3ae.dir/build.make CMakeFiles/cmTC_3f3ae.dir/build
+gmake[1]: Entering directory `/home/liuwenxin/multi-master-tool/lock_table/bu/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3f3ae.dir/src.c.o
+/home/liuwenxin/mysql_env/percona-all/percona_env/gcc-all/gcc-7.4.0-install/bin/gcc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_3f3ae.dir/src.c.o   -c /home/liuwenxin/multi-master-tool/lock_table/bu/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_3f3ae
+/home/liuwenxin/mysql_env/percona-all/percona_env/cmake/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3f3ae.dir/link.txt --verbose=1
+/home/liuwenxin/mysql_env/percona-all/percona_env/gcc-all/gcc-7.4.0-install/bin/gcc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_3f3ae.dir/src.c.o  -o cmTC_3f3ae 
+CMakeFiles/cmTC_3f3ae.dir/src.c.o: In function `main':
+src.c:(.text+0x2d): undefined reference to `pthread_create'
+src.c:(.text+0x39): undefined reference to `pthread_detach'
+src.c:(.text+0x4a): undefined reference to `pthread_join'
+src.c:(.text+0x5e): undefined reference to `pthread_atfork'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [cmTC_3f3ae] Error 1
+gmake[1]: Leaving directory `/home/liuwenxin/multi-master-tool/lock_table/bu/CMakeFiles/CMakeTmp'
+gmake: *** [cmTC_3f3ae/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/liuwenxin/multi-master-tool/lock_table/bu/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_38a3d/fast && /usr/bin/gmake -f CMakeFiles/cmTC_38a3d.dir/build.make CMakeFiles/cmTC_38a3d.dir/build
+gmake[1]: Entering directory `/home/liuwenxin/multi-master-tool/lock_table/bu/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_38a3d.dir/CheckFunctionExists.c.o
+/home/liuwenxin/mysql_env/percona-all/percona_env/gcc-all/gcc-7.4.0-install/bin/gcc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_38a3d.dir/CheckFunctionExists.c.o   -c /home/liuwenxin/mysql_env/percona-all/percona_env/cmake/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_38a3d
+/home/liuwenxin/mysql_env/percona-all/percona_env/cmake/bin/cmake -E cmake_link_script CMakeFiles/cmTC_38a3d.dir/link.txt --verbose=1
+/home/liuwenxin/mysql_env/percona-all/percona_env/gcc-all/gcc-7.4.0-install/bin/gcc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_38a3d.dir/CheckFunctionExists.c.o  -o cmTC_38a3d  -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [cmTC_38a3d] Error 1
+gmake[1]: Leaving directory `/home/liuwenxin/multi-master-tool/lock_table/bu/CMakeFiles/CMakeTmp'
+gmake: *** [cmTC_38a3d/fast] Error 2
+
+
+

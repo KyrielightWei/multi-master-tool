@@ -17,7 +17,7 @@ using namespace std;
 
 DEFINE_string(protocol, "baidu_std", "Protocol type. Defined in src/brpc/options.proto");
 DEFINE_string(connection_type, "", "Connection type. Available values: single, pooled, short");
-DEFINE_string(server, "10.11.6.116:60006", "IP Address of server");
+DEFINE_string(server, "10.11.6.116:60076", "IP Address of server");
 DEFINE_string(load_balancer, "", "The algorithm for load balancing");
 DEFINE_int32(timeout_ms, 900000000, "RPC timeout in milliseconds");
 DEFINE_int32(max_retry, 5, "Max retries(not including the first RPC)"); 
@@ -58,6 +58,7 @@ int main(int argc, char* argv[]) {
     options.connection_type = FLAGS_connection_type;
     options.timeout_ms = FLAGS_timeout_ms/*milliseconds*/;
     options.max_retry = FLAGS_max_retry;
+    // options.socket_max_unwritten_bytes=10;
     if (channel.Init(FLAGS_server.c_str(), FLAGS_load_balancer.c_str(), &options) != 0) {
         cout << "Fail to initialize channel"<<endl;;
         return -1;

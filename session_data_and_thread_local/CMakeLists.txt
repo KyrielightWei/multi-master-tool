@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.10)
 
-project("id-increment")
+project("echo")
 
 list(APPEND CMAKE_INCLUDE_PATH $ENV{BRPC_LEVELDB_INCLUDE})
 list(APPEND CMAKE_INCLUDE_PATH $ENV{BRPC_PROTOBUF_INCLUDE})
@@ -57,7 +57,7 @@ SET(Protobuf_INCLUDE_DIR $ENV{BRPC_PROTOBUF_INCLUDE})
 SET(Protobuf_LIBRARY $ENV{BRPC_PROTOBUF_LIB})
 find_package(Protobuf REQUIRED)
 find_package(Threads REQUIRED)
-protobuf_generate_cpp(PROTO_SRC PROTO_HEADER id.proto)
+protobuf_generate_cpp(PROTO_SRC PROTO_HEADER echo.proto)
 # include PROTO_HEADER
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 

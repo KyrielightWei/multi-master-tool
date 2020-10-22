@@ -8,19 +8,19 @@
  */
 
 syntax="proto2";
-package lock_table;
+package servertoclient;
 
 option cc_generic_services = true;
 
-message LOCKRequest {
+message STOCRequest{
       required string message = 1;
-};
+}
 
-message LOCKResponse {
+message STOCResponse{
       required string message = 1;
-};
+}
 
-service LOCKService {
-      rpc LOCKTable(LOCKRequest) returns (LOCKResponse);
+service STOCService{
+      rpc server_to_client(STOCRequest) returns (STOCResponse);
 };
 

@@ -57,7 +57,9 @@ SET(Protobuf_INCLUDE_DIR $ENV{BRPC_PROTOBUF_INCLUDE})
 SET(Protobuf_LIBRARY $ENV{BRPC_PROTOBUF_LIB})
 find_package(Protobuf REQUIRED)
 find_package(Threads REQUIRED)
-protobuf_generate_cpp(PROTO_SRC PROTO_HEADER lock_table.proto)
+FILE(GLOB protofiles "${CMAKE_CURRENT_SOURCE_DIR}/*.proto")
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HEADERS ${protofiles})
+#protobuf_generate_cpp(PROTO_SRC PROTO_HEADER lock_table.proto)
 # include PROTO_HEADER
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -98,8 +100,8 @@ set(DYNAMIC_LIB
     dl
     )
 
-add_executable(client client.cpp ${PROTO_HEADER} ${PROTO_SRC})
-add_executable(server server.cpp ${PROTO_HEADER} ${PROTO_SRC})
+add_executable(client client.cpp server.cpp main-client.cpp ${PROTO_HEADERS} ${PROTO_SRCS})
+add_executable(server server.cpp client.cpp main-server.cpp ${PROTO_HEADERS} ${PROTO_SRCS})
 
 target_link_libraries(client  ${DYNAMIC_LIB} ${BRPC_LIB})
 target_link_libraries(server  ${DYNAMIC_LIB} ${BRPC_LIB})

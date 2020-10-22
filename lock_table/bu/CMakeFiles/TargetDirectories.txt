@@ -1,0 +1,4 @@
+/home/liuwenxin/multi-master-tool/lock_table/bu/CMakeFiles/rebuild_cache.dir
+/home/liuwenxin/multi-master-tool/lock_table/bu/CMakeFiles/server.dir
+/home/liuwenxin/multi-master-tool/lock_table/bu/CMakeFiles/edit_cache.dir
+/home/liuwenxin/multi-master-tool/lock_table/bu/CMakeFiles/client.dir
