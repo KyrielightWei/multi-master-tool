@@ -7,8 +7,7 @@
  * @FilePath: /multi-master-tool/lock_table/main-server.cpp
  */
  
- #include "server.h"
-#include "client.h"
+#include "server.h"
 
 int main()
 {

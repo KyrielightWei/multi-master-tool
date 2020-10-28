@@ -5,6 +5,7 @@ build/
 GPATH
 GRTAGS
 GTAGS
+lock_table/build
 
 #ignore target
 target/

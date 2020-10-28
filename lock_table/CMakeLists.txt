@@ -100,8 +100,11 @@ set(DYNAMIC_LIB
     dl
     )
 
-add_executable(client client.cpp server.cpp main-client.cpp ${PROTO_HEADERS} ${PROTO_SRCS})
-add_executable(server server.cpp client.cpp main-server.cpp ${PROTO_HEADERS} ${PROTO_SRCS})
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+add_executable(client client.cpp main-client.cpp ${PROTO_HEADERS} ${PROTO_SRCS})
+add_executable(server server.cpp main-server.cpp ${PROTO_HEADERS} ${PROTO_SRCS})
 
 target_link_libraries(client  ${DYNAMIC_LIB} ${BRPC_LIB})
 target_link_libraries(server  ${DYNAMIC_LIB} ${BRPC_LIB})

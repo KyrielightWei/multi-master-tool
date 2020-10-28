@@ -8,8 +8,9 @@
  */
 #include <butil/time.h>
 #include <brpc/channel.h>
+#include <brpc/server.h>
 #include "lock_table.pb.h"
-#include "STOC.pb.h"
+#include "lock_inform.pb.h"
 #include <iostream>
 #include <ctime>
 #include <string>
@@ -18,6 +19,10 @@
 #include <stdlib.h>
 #include <condition_variable>
 #include <map>
+#include <thread>
+#include <chrono>
+
+#define DEBUG 1
 
 #define TableID int
 #define PageID int
@@ -33,7 +38,7 @@ struct mess
     int c_s_port;
 };
 
-// client which send lock request to server (in client-side)
+// The client send lock request to the server
 class RemoteLockTable
 {
     private:
@@ -57,18 +62,27 @@ class RemoteLockTable
 
 void HandleLOCKTableResponse(brpc::Controller* cntl,lock_table::LOCKResponse* response,RemoteLockTable * remote_lock_table);
 
-// client which inform the request side lock is taken (in server-side)
-class server_s_client
-{
+//The client is notified that it has acquired the lock and does not need to block any more
+class LockInformImpl : public lock_inform::InformService {
     private:
-    std::string remote_addr;
-    brpc::Channel channel;
-    servertoclient::STOCService_Stub * stub;
+        std::mutex lock;
 
     public:
-    int set_remote_addr(std::string addr);
-    int init();
-    int send_mess(std::string str);
+        LockInformImpl() {};
+        virtual ~LockInformImpl() {};
+        virtual void LockInform(google::protobuf::RpcController* cntl_base, const lock_inform::InformRequest* request, lock_inform::InformResponse* response, google::protobuf::Closure* done);
 };
 
-void STOCResponse(brpc::Controller* cntl,servertoclient::STOCResponse* response,server_s_client * server_s_client);
+class InformReceiver
+{
+    private:
+    int port;
+    brpc::Server server;
+    LockInformImpl inform_server;
+
+    public:
+    int init();
+    int run();
+    int get_port();
+    int set_port(int setport);
+};

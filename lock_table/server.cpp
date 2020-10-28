@@ -8,28 +8,26 @@
  */
 
 #include "server.h"
-#include "client.h"
-#include "lock_table.pb.h"
-#include "STOC.pb.h"
-#include <iostream>
-#include <string>
-#include <ctime>
-#include <map>
-#include <mutex>
-#include <set>
-#include <queue>
-#include <utility>
-#include <thread>
-//debug
-#include <fstream>
-std::mutex debug_lock;
-int debug_num=0;
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
 
-//server which handle lock table (in server-side)
+#if DEBUG
+    #include <fstream>
+    std::mutex debug_lock;
+    int debug_num=0;
+#endif
+
+//log configure
+auto my_logger = spdlog::basic_logger_mt("SERVER", "server.log");;
+
+/**
+***LockTableServer
+***server which handle lock table
+***/
 
 void back_to_client(std::string addr,std::string c_c_addr,std::string table_page,int type)
 {
-    server_s_client s_c;
+    InformSender s_c;
     s_c.set_remote_addr(addr);
     s_c.init();
     s_c.send_mess(c_c_addr+","+table_page+","+std::to_string(type));
@@ -55,6 +53,7 @@ void LOCKTableImpl::LOCKTable(google::protobuf::RpcController* cntl_base, const 
     std::string table_page = tableid+"-"+pageid;
     std::string client_addr=butil::endpoint2str(cntl->remote_side()).c_str();
     std::string addr=client_addr+","+c_s_port;
+    std::pair<std::string,int> addr_and_type;
         
     if(mess=="read"){
         if(lock_type[table_page]==NOLOCK||lock_type[table_page]==READ){
@@ -121,54 +120,56 @@ void LOCKTableImpl::LOCKTable(google::protobuf::RpcController* cntl_base, const 
         response->set_message("ok");
     }
 
-//****************debug
-    std::ofstream ofs;
-    ofs.open("./map.txt",std::ios::app);/*
+#if DEBUG
     std::map<std::string,int>::iterator mapit;
     std::map<std::string,std::set<std::string>>::iterator clientit;
     std::set<std::string> cliset;
     std::set<std::string>::iterator it;
-    ofs<<std::endl<<"---------------"<<std::endl;
-    ofs<<request->message()<<std::endl;
+    std::string debug_mess="receive : "+request->message();
     for(mapit=lock_type.begin();mapit!=lock_type.end();mapit++)
     {
-        ofs<<"table/page:"<<mapit->first<<" lock:"<<mapit->second<<" client:";
+        debug_mess+=" table/page: "+mapit->first+" lock:"+std::to_string(mapit->second)+" client:";
         for(it=client_set[mapit->first].begin();it!=client_set[mapit->first].end();it++)
         {
-            ofs<<*it<<",";
+            debug_mess+=*it+",";
         }
-        ofs<<" /// wait list:";
+        debug_mess+=" ** wait list: ";
         std::queue<std::pair<std::string,int>> quetmp=client_wait[mapit->first];
         while(!quetmp.empty())
         {
-            ofs<<quetmp.front().first<<",";
+            debug_mess+=quetmp.front().first+",";
             quetmp.pop();
         }
-        ofs<<std::endl;
     }
-    ofs<<"---------------"<<std::endl;*/
     debug_lock.lock();
     debug_num++;
-    ofs<<"sum request= "<<debug_num;
+    debug_mess+=" ** sum request= "+std::to_string(debug_num);
     debug_lock.unlock();
-    ofs.close();
+    my_logger->debug(debug_mess);
+#endif
 }
 
 
 int LockTableServer::init()
 {
+    my_logger = spdlog::basic_logger_mt("SERVER-"+std::to_string(port), "server.log");
+    #if DEBUG
+    my_logger->set_level(spdlog::level::debug);
+    #endif
+    my_logger->flush_on(spdlog::level::debug);
+
     if (server.AddService(&lock_table_service_impl, brpc::SERVER_OWNS_SERVICE) != 0) {
-        std::cout << "Fail to add service"<<std::endl;
+        my_logger->error("Fail to add service");
         return -1;
     }
 
     brpc::ServerOptions options;
     options.idle_timeout_sec = -1;
     if (server.Start(port, &options) != 0) {
-        std::cout << "Fail to start Server"<<std::endl;
+        my_logger->error("Fail to start Server");
         return -1;
     }
-    std::cout<<"Server start"<<std::endl;
+    my_logger->info("Server start");
 }
 
 int LockTableServer::run()
@@ -176,59 +177,49 @@ int LockTableServer::run()
     server.RunUntilAskedToQuit();
 }
 
+/**
+***InformSender
+***The server informs the client that it has acquired the lock
+***/
 
-//server which receive the request that waited lock can be obtained (in client-side)
-
-void STOCImpl::server_to_client(google::protobuf::RpcController* cntl_base, const servertoclient::STOCRequest* request, servertoclient::STOCResponse* response, google::protobuf::Closure* done) 
+int InformSender::init()
 {
-    brpc::ClosureGuard done_guard(done);
-    brpc::Controller* cntl = static_cast<brpc::Controller*>(cntl_base);
-    std::lock_guard<std::mutex> guard(lock);
-        
-    time_t now = time(0);
-    char* dt = ctime(&now);
-        
-    std::cout<<"Received lock information from " << cntl->remote_side() << " to " << cntl->local_side()<< "-- message:" << request->message()<<" ,time:"<<dt<<std::endl;
-
-    std::string recive_mess=request->message();
-    size_t pos=recive_mess.find(",");std::string talk_client =recive_mess.substr(0,pos);
-    std::string table_page_tp=recive_mess.substr(pos+1,recive_mess.size());
-    std::cout<<talk_client<<" can get lock "<<table_page_tp<<std::endl;
-
-    std::unique_lock<std::mutex> locker(shared_cv[talk_client][table_page_tp].first);
-    locker.unlock();
-    shared_cv[talk_client][table_page_tp].second.notify_all();   
-    response->set_message("i know");
-}
-
-int client_server::init()
-{
-    if (cli_s_server.AddService(&client_s_server, brpc::SERVER_OWNS_SERVICE) != 0) {
-        std::cout << "Fail to add service in client"<<std::endl;
+    brpc::ChannelOptions options;
+    options.protocol = brpc::PROTOCOL_BAIDU_STD;
+    options.connection_type = brpc::CONNECTION_TYPE_SINGLE;
+    if (channel.Init(remote_addr.c_str(), &options) != 0) {
+        my_logger->error("Fail to initialize channel to send inform to client");
         return -1;
     }
+}
 
-    brpc::ServerOptions options;
-    options.idle_timeout_sec = -1;
-    if (cli_s_server.Start(port, &options) != 0) {
-        std::cout << "Fail to start Server in client"<<std::endl;
-        return -1;
+int InformSender::set_remote_addr(std::string addr)
+{
+    remote_addr=addr;
+}
+
+int InformSender::send_mess(std::string str)
+{
+    stub=new lock_inform::InformService_Stub(&channel);
+    lock_inform::InformRequest request;
+    lock_inform::InformResponse* response=new lock_inform::InformResponse();
+    brpc::Controller* cntl = new brpc::Controller();
+
+    request.set_message(str);
+
+    google::protobuf::Closure* done = brpc::NewCallback(&HandleLockInformationResponse,cntl,response,this);
+    stub->LockInform(cntl, &request, response, done);
+}
+
+void HandleLockInformationResponse(brpc::Controller* cntl,lock_inform::InformResponse* response,InformSender * InformSender)
+{
+    std::unique_ptr<brpc::Controller> cntl_guard(cntl);
+    std::unique_ptr<lock_inform::InformResponse> response_guard(response);
+    if(cntl->Failed()){
+        my_logger->error(cntl->ErrorText());
+        return;
     }
-    std::cout<<"Server start in client"<<std::endl;
-}
-
-int client_server::run()
-{
-    std::cout<<"client's server is run"<<std::endl;
-    cli_s_server.RunUntilAskedToQuit();
-}
-
-int client_server::get_port()
-{
-    return port;
-}
-
-int client_server::set_port(int setport)
-{ 
-    port=setport;
+    #if DEBUG
+        my_logger->debug(response->message());
+    #endif
 }
